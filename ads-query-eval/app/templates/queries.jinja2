@@ -1,0 +1,13 @@
+{% extends 'base.jinja2' %}
+
+{% block header %}
+ {% include 'queries_summary.jinja2' %}
+{% endblock %}
+
+{% block content %}
+  <div class="p-4">
+    {% for query in queries %}
+        {% include 'query_summary.jinja2' %}
+    {% endfor %}
+  </div>
+{% endblock %}

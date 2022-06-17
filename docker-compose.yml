@@ -8,14 +8,69 @@ services:
       - "8000"
     restart: unless-stopped
 
+  mongo:
+    image: mongo:4.4-bionic
+    ports:
+      - "27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: root
+
+
+  dagster-postgresql:
+    image: postgres:11
+    volumes:
+      - dagster_postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "postgres_user"
+      POSTGRES_PASSWORD: "postgres_password"
+      POSTGRES_DB: "postgres_db"
+
+  dagster-dagit:
+    build: ./dagster
+    image: polyneme/dagster-demo
+    entrypoint: ["tini", "--", "../lib/repo/entrypoint-dagit.sh"]
+    ports:
+      - "3000"
+    env_file:
+      - ./config.env
+    restart: on-failure
+    environment:
+      DAGSTER_POSTGRES_USER: "postgres_user"
+      DAGSTER_POSTGRES_PASSWORD: "postgres_password"
+      DAGSTER_POSTGRES_DB: "postgres_db"
+    depends_on:
+      - dagster-postgresql
+    volumes:
+      - ./dagster:/opt/dagster/lib
+
+  dagster-daemon:
+    build: ./dagster
+    image: polyneme/dagster-demo
+    entrypoint: ["tini", "--", "../lib/repo/entrypoint-daemon.sh"]
+    restart: on-failure
+    env_file:
+      - ./config.env
+    environment:
+      DAGSTER_POSTGRES_USER: "postgres_user"
+      DAGSTER_POSTGRES_PASSWORD: "postgres_password"
+      DAGSTER_POSTGRES_DB: "postgres_db"
+    depends_on:
+      - dagster-postgresql
+    volumes:
+      - ./dagster:/opt/dagster/lib
+
   nginx:
     build: ./nginx
     image: polyneme/nginx
     env_file:
       - ./config.env
     volumes:
-      - ads_query_eval_nginx_conf:/etc/nginx/sites
-      - ads_query_eval_letsencrypt_certs:/etc/letsencrypt
+      - nginx_conf:/etc/nginx/sites
+      - letsencrypt_certs:/etc/letsencrypt
       - certbot_acme_challenge:/var/www/certbot
       - ./vhosts:/etc/nginx/vhosts
       - ./html:/var/www/html
@@ -30,7 +85,7 @@ services:
     env_file:
       - ./config.env
     volumes:
-      - ads_query_eval_letsencrypt_certs:/etc/letsencrypt
+      - letsencrypt_certs:/etc/letsencrypt
       - certbot_acme_challenge:/var/www/certbot
 
   cron:
@@ -44,8 +99,17 @@ services:
     restart: unless-stopped
 
 volumes:
-  ads_query_eval_nginx_conf:
-    external: true
-  ads_query_eval_letsencrypt_certs:
-    external: true
+  nginx_conf:
+    external:
+      name: ${COMPOSE_PROJECT_NAME}_nginx_conf
+  letsencrypt_certs:
+    external:
+      name: ${COMPOSE_PROJECT_NAME}_letsencrypt_certs
+  mongo_data:
+    external:
+      name: ${COMPOSE_PROJECT_NAME}_mongo_data
+  dagster_postgres_data:
+    external:
+      name: ${COMPOSE_PROJECT_NAME}_dagster_postgres_data
   certbot_acme_challenge:
+
