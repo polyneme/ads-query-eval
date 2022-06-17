@@ -1,3 +1,5 @@
+Demo up at <https://ads-query-eval.polyneme.xyz>.
+
 ```bash
 source .env
 docker volume create --name=${COMPOSE_PROJECT_NAME}_nginx_conf
