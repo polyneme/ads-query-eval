@@ -1,6 +1,6 @@
 ```bash
-docker volume create --name=nginx_conf
-docker volume create --name=letsencrypt_certs
+docker volume create --name=ads_query_eval_nginx_conf
+docker volume create --name=ads_query_eval_letsencrypt_certs
 docker-compose up -d
 docker-compose logs -f
 ```

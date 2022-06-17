@@ -2,8 +2,8 @@ version: "2"
 
 services:
   app:
-    build: ./fastapi-app-demo
-    image: polyneme/fastapi-app-demo
+    build: ./ads-query-eval
+    image: polyneme/ads-query-eval
     ports:
       - "8000"
     restart: unless-stopped
@@ -14,8 +14,8 @@ services:
     env_file:
       - ./config.env
     volumes:
-      - nginx_conf:/etc/nginx/sites
-      - letsencrypt_certs:/etc/letsencrypt
+      - ads_query_eval_nginx_conf:/etc/nginx/sites
+      - ads_query_eval_letsencrypt_certs:/etc/letsencrypt
       - certbot_acme_challenge:/var/www/certbot
       - ./vhosts:/etc/nginx/vhosts
       - ./html:/var/www/html
@@ -30,7 +30,7 @@ services:
     env_file:
       - ./config.env
     volumes:
-      - letsencrypt_certs:/etc/letsencrypt
+      - ads_query_eval_letsencrypt_certs:/etc/letsencrypt
       - certbot_acme_challenge:/var/www/certbot
 
   cron:
@@ -44,8 +44,8 @@ services:
     restart: unless-stopped
 
 volumes:
-  nginx_conf:
+  ads_query_eval_nginx_conf:
     external: true
-  letsencrypt_certs:
+  ads_query_eval_letsencrypt_certs:
     external: true
   certbot_acme_challenge:
