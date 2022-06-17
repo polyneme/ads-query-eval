@@ -19,7 +19,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 
 WORKDIR /opt/dagster/lib
 COPY ./requirements.txt  /opt/dagster/lib/requirements.txt
-RUN pip install --no-cache-dir --upgrade /opt/dagster/lib/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /opt/dagster/lib/requirements.txt
 
 COPY ./repo /opt/dagster/lib/repo
 

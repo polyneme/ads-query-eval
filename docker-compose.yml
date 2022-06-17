@@ -16,7 +16,7 @@ services:
   mongo:
     image: mongo:4.4-bionic
     ports:
-      - "27018:27017"
+      - "57018:27017"
     volumes:
       - ads_query_eval_mongo_data:/data/db
     restart: always
@@ -35,7 +35,7 @@ services:
 
   dagster-dagit:
     build: ./dagster
-    image: polyneme/dagster
+    image: polyneme/dagster-demo
     entrypoint: ["tini", "--", "../lib/repo/entrypoint-dagit.sh"]
     expose:
       - "3000"
@@ -43,7 +43,7 @@ services:
       - "3000:3000"
     env_file:
       - ./config.env
-    restart: unless-stopped
+    restart: on-failure
     environment:
       DAGSTER_POSTGRES_USER: "postgres_user"
       DAGSTER_POSTGRES_PASSWORD: "postgres_password"
@@ -55,10 +55,9 @@ services:
 
   dagster-daemon:
     build: ./dagster
-    image: polyneme/dagster
-    container_name: dagster-daemon
+    image: polyneme/dagster-demo
     entrypoint: ["tini", "--", "../lib/repo/entrypoint-daemon.sh"]
-    restart: unless-stopped
+    restart: on-failure
     env_file:
       - ./config.env
     environment:
