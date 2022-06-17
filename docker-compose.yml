@@ -3,7 +3,7 @@ version: "2"
 services:
   nginx:
     build: ./nginx
-    image: evgeniy-khyst/nginx
+    image: polyneme/nginx
     env_file:
       - ./config.env
     volumes:
@@ -19,7 +19,7 @@ services:
 
   certbot:
     build: ./certbot
-    image: evgeniy-khyst/certbot
+    image: polyneme/certbot
     env_file:
       - ./config.env
     volumes:
@@ -28,7 +28,7 @@ services:
 
   cron:
     build: ./cron
-    image: evgeniy-khyst/cron
+    image: polyneme/cron
     environment:
       COMPOSE_PROJECT_NAME: "${COMPOSE_PROJECT_NAME}"
     volumes:
