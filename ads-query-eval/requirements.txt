@@ -1,2 +1,4 @@
 fastapi>=0.75.0,<0.76.0 # # until using starlette >=0.20.2
+jinja2
 uvicorn
+black

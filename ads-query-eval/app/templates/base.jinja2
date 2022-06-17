@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+  <title>{% block title %}{% endblock %} - ADS Query Evalution</title>
+  {# <link rel="stylesheet" href="/static/style.css') }}"> #}
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+</head>
+<body>
+  <nav class="bg-blue-500 text-white px-4 pt-2">
+    <h1><a href="/" class="text-white-500 underline">ADS Query Evalution</a></h1>
+  </nav>
+  <section class="content">
+    <header id="main-header" class="header">
+      <div id="header-content">{% block header %}{% endblock %}</div>
+    </header>
+    {% for message in messages %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </section>
+  <section class="footer">
+    {% block footer %}
+      <div id="main-footer" class="footer text-center py-8 text-slate-400">
+        <div>Questions? Contact <a href="mailto:donny@polyneme.xyz">donny@polyneme.xyz</a></div>
+      </div>
+    {% endblock %}
+  </section>
+</body>
+</html>
