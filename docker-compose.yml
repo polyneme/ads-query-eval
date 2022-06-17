@@ -1,6 +1,13 @@
 version: "2"
 
 services:
+  app:
+    build: ./fastapi-app-demo
+    image: polyneme/fastapi-app-demo
+    ports:
+      - "8000"
+    restart: unless-stopped
+
   nginx:
     build: ./nginx
     image: polyneme/nginx
