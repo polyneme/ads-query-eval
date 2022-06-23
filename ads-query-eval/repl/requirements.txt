@@ -1,0 +1,6 @@
+openpyxl
+pandas
+rdflib
+requests
+toolz
+tqdm
