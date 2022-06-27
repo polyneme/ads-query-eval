@@ -1,13 +1,28 @@
 Demo up at <https://ads-query-eval.polyneme.xyz>.
 
+
+# Local Development
+
 ```bash
 source .env
-docker volume create --name=${COMPOSE_PROJECT_NAME}_nginx_conf
-docker volume create --name=${COMPOSE_PROJECT_NAME}_letsencrypt_certs
 docker volume create --name=${COMPOSE_PROJECT_NAME}_mongo_data
 docker volume create --name=${COMPOSE_PROJECT_NAME}_dagster_postgres_data
 docker-compose up -d
-docker-compose logs -f # to confirm resource readiness and certificate installation
+# Confirm resource readiness
+docker-compose logs -f
+```
+
+# Production
+
+```bash
+source .env
+docker volume create --name=${COMPOSE_PROJECT_NAME}_mongo_data
+docker volume create --name=${COMPOSE_PROJECT_NAME}_dagster_postgres_data
+docker volume create --name=${COMPOSE_PROJECT_NAME}_nginx_conf
+docker volume create --name=${COMPOSE_PROJECT_NAME}_letsencrypt_certs
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# Confirm resource readiness and certificate installation
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs -f
 ```
 
 See https://github.com/polyneme/letsencrypt-docker-compose for customization.

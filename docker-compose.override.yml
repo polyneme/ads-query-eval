@@ -1,0 +1,25 @@
+version: "3.7"
+
+services:
+  repl:
+    image: jupyter/minimal-notebook
+    volumes:
+      - ./ads-query-eval/repl:/home/jovyan/work
+      - ./ads-query-eval/repl/configure_environment.sh:/usr/local/bin/before-notebook.d/configure_environment.sh
+    ports:
+      - "8998:8888"
+
+  app:
+    ports:
+      - "8000:8000"
+    command: ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+    volumes:
+      - ./ads-query-eval/app:/code/app
+
+  mongo:
+    ports:
+      - "57018:27017"
+
+  dagster-dagit:
+    ports:
+      - "3000:3000"

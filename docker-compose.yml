@@ -1,4 +1,4 @@
-version: "2"
+version: "3.7"
 
 services:
   app:
@@ -6,13 +6,13 @@ services:
     image: polyneme/ads-query-eval
     env_file:
       - ./config.env
-    ports:
+    expose:
       - "8000"
     restart: unless-stopped
 
   mongo:
     image: mongo:4.4-bionic
-    ports:
+    expose:
       - "27017"
     volumes:
       - mongo_data:/data/db
@@ -20,7 +20,6 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: root
-
 
   dagster-postgresql:
     image: postgres:11
@@ -35,7 +34,7 @@ services:
     build: ./dagster
     image: polyneme/dagster-demo
     entrypoint: ["tini", "--", "../lib/repo/entrypoint-dagit.sh"]
-    ports:
+    expose:
       - "3000"
     env_file:
       - ./config.env
@@ -65,53 +64,10 @@ services:
     volumes:
       - ./dagster:/opt/dagster/lib
 
-  nginx:
-    build: ./nginx
-    image: polyneme/nginx
-    env_file:
-      - ./config.env
-    volumes:
-      - nginx_conf:/etc/nginx/sites
-      - letsencrypt_certs:/etc/letsencrypt
-      - certbot_acme_challenge:/var/www/certbot
-      - ./vhosts:/etc/nginx/vhosts
-      - ./html:/var/www/html
-    ports:
-      - "80:80"
-      - "443:443"
-    restart: unless-stopped
-
-  certbot:
-    build: ./certbot
-    image: polyneme/certbot
-    env_file:
-      - ./config.env
-    volumes:
-      - letsencrypt_certs:/etc/letsencrypt
-      - certbot_acme_challenge:/var/www/certbot
-
-  cron:
-    build: ./cron
-    image: polyneme/cron
-    environment:
-      COMPOSE_PROJECT_NAME: "${COMPOSE_PROJECT_NAME}"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./:/workdir:ro
-    restart: unless-stopped
-
 volumes:
-  nginx_conf:
-    external:
-      name: ${COMPOSE_PROJECT_NAME}_nginx_conf
-  letsencrypt_certs:
-    external:
-      name: ${COMPOSE_PROJECT_NAME}_letsencrypt_certs
   mongo_data:
-    external:
-      name: ${COMPOSE_PROJECT_NAME}_mongo_data
+    name: ${COMPOSE_PROJECT_NAME}_mongo_data
+    external: true
   dagster_postgres_data:
-    external:
-      name: ${COMPOSE_PROJECT_NAME}_dagster_postgres_data
-  certbot_acme_challenge:
-
+    name: ${COMPOSE_PROJECT_NAME}_dagster_postgres_data
+    external: true

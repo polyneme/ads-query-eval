@@ -1,0 +1,46 @@
+version: "3.7"
+
+services:
+  nginx:
+    build: ./nginx
+    image: polyneme/nginx
+    env_file:
+      - ./config.env
+    volumes:
+      - nginx_conf:/etc/nginx/sites
+      - letsencrypt_certs:/etc/letsencrypt
+      - certbot_acme_challenge:/var/www/certbot
+      - ./vhosts:/etc/nginx/vhosts
+      - ./html:/var/www/html
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: unless-stopped
+
+  certbot:
+    build: ./certbot
+    image: polyneme/certbot
+    env_file:
+      - ./config.env
+    volumes:
+      - letsencrypt_certs:/etc/letsencrypt
+      - certbot_acme_challenge:/var/www/certbot
+
+  cron:
+    build: ./cron
+    image: polyneme/cron
+    environment:
+      COMPOSE_PROJECT_NAME: "${COMPOSE_PROJECT_NAME}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./:/workdir:ro
+    restart: unless-stopped
+
+volumes:
+  nginx_conf:
+    name: ${COMPOSE_PROJECT_NAME}_nginx_conf
+    external: true
+  letsencrypt_certs:
+    name: ${COMPOSE_PROJECT_NAME}_letsencrypt_certs
+    external: true
+  certbot_acme_challenge:
