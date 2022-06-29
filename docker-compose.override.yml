@@ -6,6 +6,8 @@ services:
     volumes:
       - ./ads-query-eval/repl:/home/jovyan/work
       - ./ads-query-eval/repl/configure_environment.sh:/usr/local/bin/before-notebook.d/configure_environment.sh
+    environment:
+      ADS_API_TOKEN: "${ADS_API_TOKEN}"
     ports:
       - "8998:8888"
 

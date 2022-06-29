@@ -4,6 +4,7 @@ Demo up at <https://ads-query-eval.polyneme.xyz>.
 # Local Development
 
 ```bash
+cp .env.example .env # and modify .env as appropriate
 source .env
 docker volume create --name=${COMPOSE_PROJECT_NAME}_mongo_data
 docker volume create --name=${COMPOSE_PROJECT_NAME}_dagster_postgres_data
@@ -15,6 +16,7 @@ docker-compose logs -f
 # Production
 
 ```bash
+# Optional: cp .env.example .env # and modify .env as appropriate
 source .env
 docker volume create --name=${COMPOSE_PROJECT_NAME}_mongo_data
 docker volume create --name=${COMPOSE_PROJECT_NAME}_dagster_postgres_data
