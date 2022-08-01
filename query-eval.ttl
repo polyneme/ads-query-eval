@@ -1,5 +1,3 @@
-# baseURI: https://n2t.net/ark:57802/dw0/query-eval
-
 @base <https://n2t.net/ark:57802/dw0/query-eval> .
 @prefix : <http://ns.polyneme.xyz/2022/6/untitled-ontology-16#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
