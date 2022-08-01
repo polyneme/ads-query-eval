@@ -1,0 +1,363 @@
+# baseURI: https://n2t.net/ark:57802/dw0/query-eval
+
+@base <https://n2t.net/ark:57802/dw0/query-eval> .
+@prefix : <http://ns.polyneme.xyz/2022/6/untitled-ontology-16#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://n2t.net/ark:57802/dw0/query-eval>
+	a owl:Ontology ;
+	.
+
+<EvaluatingProcedure>
+	a owl:Class ;
+	rdfs:subClassOf <Evaluator> ;
+	owl:disjointWith <User> ;
+	owl:equivalentClass [
+		a owl:Restriction ;
+		owl:onProperty <revision_of> ;
+		owl:onClass <EvaluatingProcedure> ;
+		owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+	] ;
+	.
+
+<Evaluation>
+	a owl:Class ;
+	rdfs:subClassOf <Operation> ;
+	owl:disjointWith <Retrieval> ;
+	owl:equivalentClass
+		[
+			a owl:Restriction ;
+			owl:onProperty <p_at_25> ;
+			owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+			owl:onDataRange xsd:decimal ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty <r_at_1000> ;
+			owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+			owl:onDataRange xsd:decimal ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty <evaluator> ;
+			owl:onClass <Evaluator> ;
+			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+		]
+		;
+	.
+
+<Evaluator>
+	a owl:Class ;
+	owl:equivalentClass
+		[
+			a owl:Restriction ;
+			owl:onProperty <evaluating_procedure> ;
+			owl:onClass <EvaluatingProcedure> ;
+			owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty <user> ;
+			owl:onClass <User> ;
+			owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+		]
+		;
+	.
+
+<ItemOfEvaluation>
+	a owl:Class ;
+	owl:equivalentClass
+		[
+			a owl:Restriction ;
+			owl:onProperty <relevance> ;
+			owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+			owl:onDataRange xsd:string ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty <uncertainty> ;
+			owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+			owl:onDataRange xsd:string ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty <evaluation> ;
+			owl:onClass <Evaluation> ;
+			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty <retrieved_item> ;
+			owl:onClass <RetrievedItem> ;
+			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty <evaluation_status> ;
+			owl:onDataRange xsd:string ;
+			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+		]
+		;
+	.
+
+<Job>
+	a owl:Class ;
+	.
+
+<Operation>
+	a owl:Class ;
+	.
+
+<Query>
+	a owl:Class ;
+	owl:equivalentClass [
+		a owl:Restriction ;
+		owl:onProperty <query_literal> ;
+		owl:onDataRange xsd:string ;
+		owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+	] ;
+	.
+
+<RetrievableItem>
+	a owl:Class ;
+	owl:equivalentClass [
+		a owl:Restriction ;
+		owl:onProperty <ads_bibcode> ;
+		owl:onDataRange xsd:string ;
+		owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+	] ;
+	.
+
+<Retrieval>
+	a owl:Class ;
+	rdfs:subClassOf <Operation> ;
+	owl:equivalentClass
+		[
+			a owl:Restriction ;
+			owl:onProperty <completed_at> ;
+			owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+			owl:onDataRange xsd:dateTime ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty <query> ;
+			owl:onClass <Query> ;
+			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty <retrieval_status> ;
+			owl:onDataRange xsd:string ;
+			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+		]
+		;
+	.
+
+<RetrievedItem>
+	a owl:Class ;
+	owl:equivalentClass
+		[
+			a owl:Restriction ;
+			owl:onProperty <retrievable_item> ;
+			owl:onClass <RetrievableItem> ;
+			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty <retrieved_items_list> ;
+			owl:onClass <RetrievedItemsList> ;
+			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+		]
+		;
+	.
+
+<RetrievedItemsList>
+	a owl:Class ;
+	owl:equivalentClass
+		[
+			a owl:Restriction ;
+			owl:onProperty <mrr> ;
+			owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+			owl:onDataRange xsd:decimal ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty <retrieval> ;
+			owl:onClass <Retrieval> ;
+			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+		]
+		;
+	.
+
+<ScheduledRetrieval>
+	a owl:Class ;
+	rdfs:subClassOf <Job> ;
+	owl:disjointWith <SensedEvaluationOfRetrievedItemsByProcedure> ;
+	.
+
+<SensedEvaluationOfRetrievedItemsByProcedure>
+	a owl:Class ;
+	rdfs:subClassOf <Job> ;
+	.
+
+<User>
+	a owl:Class ;
+	rdfs:subClassOf <Evaluator> ;
+	owl:equivalentClass
+		[
+			a owl:Restriction ;
+			owl:onProperty <email_address> ;
+			owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+			owl:onDataRange xsd:string ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty <hashed_password> ;
+			owl:onDataRange xsd:string ;
+			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+		]
+		;
+	.
+
+<ads_bibcode>
+	a owl:DatatypeProperty ;
+	rdfs:range xsd:string ;
+	.
+
+<completed_at>
+	a owl:DatatypeProperty ;
+	rdfs:range xsd:dateTime ;
+	.
+
+<email_address>
+	a owl:DatatypeProperty ;
+	rdfs:subPropertyOf owl:topDataProperty ;
+	rdfs:range xsd:string ;
+	.
+
+<evaluating_procedure>
+	a owl:ObjectProperty ;
+	rdfs:range <EvaluatingProcedure> ;
+	.
+
+<evaluation>
+	a owl:ObjectProperty ;
+	rdfs:range <Evaluation> ;
+	.
+
+<evaluation_status>
+	a owl:DatatypeProperty ;
+	rdfs:range xsd:string ;
+	.
+
+<evaluator>
+	a owl:ObjectProperty ;
+	rdfs:range <Evaluator> ;
+	.
+
+<hashed_password>
+	a owl:DatatypeProperty ;
+	rdfs:range xsd:string ;
+	.
+
+<mrr>
+	a owl:DatatypeProperty ;
+	rdfs:label "Mean Reciprocal Rank" ;
+	rdfs:range xsd:decimal ;
+	.
+
+<operation>
+	a owl:ObjectProperty ;
+	rdfs:range <Operation> ;
+	.
+
+<p_at_25>
+	a owl:DatatypeProperty ;
+	rdfs:subPropertyOf owl:topDataProperty ;
+	rdfs:label "Precision P@25" ;
+	rdfs:range xsd:decimal ;
+	.
+
+<query>
+	a owl:ObjectProperty ;
+	rdfs:range <Query> ;
+	.
+
+<query_literal>
+	a owl:DatatypeProperty ;
+	rdfs:range xsd:string ;
+	.
+
+<r_at_1000>
+	a owl:DatatypeProperty ;
+	rdfs:label "Recall R@1000" ;
+	rdfs:range xsd:decimal ;
+	.
+
+<relevance>
+	a owl:DatatypeProperty ;
+	rdfs:comment
+		"'0' | '1'" ,
+		"xsd:string type allows more granularity if desired"
+		;
+	rdfs:range xsd:string ;
+	.
+
+<retrievable_item>
+	a owl:ObjectProperty ;
+	rdfs:range <RetrievableItem> ;
+	.
+
+<retrieval>
+	a owl:ObjectProperty ;
+	rdfs:range <Retrieval> ;
+	.
+
+<retrieval_status>
+	a owl:DatatypeProperty ;
+	rdfs:comment "'completed' | 'failed' | 'aborted' | 'running' | 'scheduled' | 'unscheduled'" ;
+	rdfs:range xsd:string ;
+	.
+
+<retrieved_item>
+	a owl:ObjectProperty ;
+	rdfs:range <RetrievedItem> ;
+	.
+
+<retrieved_items_list>
+	a owl:ObjectProperty ;
+	rdfs:range <RetrievedItemsList> ;
+	.
+
+<revision_of>
+	a owl:ObjectProperty ;
+	.
+
+<schedule_job>
+	a owl:ObjectProperty ;
+	rdfs:range <Job> ;
+	.
+
+<sensor_job>
+	a owl:ObjectProperty ;
+	rdfs:range <Job> ;
+	.
+
+<uncertainty>
+	a owl:DatatypeProperty ;
+	rdfs:comment
+		"'0' | '1'" ,
+		"xsd:string type allows more granularity if desired"
+		;
+	rdfs:range xsd:string ;
+	.
+
+<user>
+	a owl:ObjectProperty ;
+	rdfs:range <User> ;
+	.
+
