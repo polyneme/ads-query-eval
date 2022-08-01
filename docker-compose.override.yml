@@ -7,8 +7,9 @@ services:
       dockerfile: repl.Dockerfile
     image: polyneme/ads-query-eval-nb
     volumes:
-      - ./ads_query_eval/repl:/home/jovyan/work
-      - ./ads_query_eval/repl/configure_environment.sh:/usr/local/bin/before-notebook.d/configure_environment.sh
+      - ./repl:/home/jovyan/work
+      - ./repl/configure_environment.sh:/usr/local/bin/before-notebook.d/configure_environment.sh
+      - ./ads_query_eval:/code/ads_query_eval
     environment:
       ADS_API_TOKEN: "${ADS_API_TOKEN}"
     ports:

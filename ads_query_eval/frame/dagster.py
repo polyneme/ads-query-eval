@@ -1,5 +1,3 @@
-import gzip
-import json
 import pickle
 
 from dagster import (
@@ -8,19 +6,17 @@ from dagster import (
     resource,
     graph,
     OpExecutionContext,
-    DynamicOut,
-    DynamicOutput,
     io_manager,
     IOManager,
 )
 from gridfs import GridFS
 
-from ads_query_eval.bootstrap import bootstrap
+from ads_query_eval.app.bootstrap import bootstrap
 from ads_query_eval.config import get_mongo_db
 from ads_query_eval.lib.fetch import fetch_first_n
 
 from ads_query_eval.lib.io import gfs_put_as_gzipped_json, fetch_first_page
-from ads_query_eval.models import Query
+from ads_query_eval.frame.models import Query
 
 bootstrap()
 

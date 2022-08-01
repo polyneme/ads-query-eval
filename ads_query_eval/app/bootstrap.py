@@ -1,10 +1,7 @@
-from typing import Callable
-
 from pymongo import ReplaceOne
-from pymongo.database import Database as MongoDatabase
 
 from ads_query_eval.config import get_mongo_db
-from ads_query_eval.models import Query, QueryTopicReviews
+from ads_query_eval.frame.models import Query, QueryTopicReviews
 
 QUERIES = (
     'full:"coronal mass ejection"',

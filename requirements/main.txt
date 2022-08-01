@@ -18,9 +18,9 @@ anyio==3.6.1 \
     # via
     #   starlette
     #   watchfiles
-attrs==21.4.0 \
-    --hash=sha256:2d27e3784d7a565d36ab851fe94887c5eccd6a463168875832a1be79c82828b4 \
-    --hash=sha256:626ba8234211db98e869df76230a137c4c40a12d72445c45d5f5b716f076e2fd
+attrs==22.1.0 \
+    --hash=sha256:29adc2665447e5191d0e7c568fde78b21f9672d344281d0c6e1ab085429b22b6 \
+    --hash=sha256:86efa402f67bf2df34f51a335487cf46b1ec130d02b8d39fd248abfd30da551c
     # via jsonschema
 beautifulsoup4==4.11.1 \
     --hash=sha256:58d5c3d29f5a36ffeb94f02f0d786cd53014cf9b3b3951d42e0080d8a9498d30 \
@@ -53,25 +53,25 @@ croniter==1.3.5 \
     --hash=sha256:4f72faca42c00beb6e30907f1315145f43dfbe5ec0ad4ada24b4c0d57b86a33a \
     --hash=sha256:7592fc0e8a00d82af98dfa2768b75983b6fb4c2adc8f6d0d7c931a715b7cefee
     # via dagster
-dagit==0.15.7 \
-    --hash=sha256:6487824e0a7c44a23e1d6599ef604c9d28e4e0a96afde09699a5f5079b973f5c \
-    --hash=sha256:abd94f7aff32cea17b88c0c491493158225879053bb76f5f2abc1d1a9a3882c0
+dagit==0.15.8 \
+    --hash=sha256:038de3a7ce37a1369549f47af23db562468ef6b52d03e20acd936951d26a17bd \
+    --hash=sha256:fffaa201ddd3eaa1f49cf6fa9ae274d8b258db0bbb9e6474f634d3e91c6dec60
     # via -r requirements/main.in
-dagster==0.15.7 \
-    --hash=sha256:25d23f4395731cebf53600941bc94fa28b3178924e51f96ef987cf945e46168e \
-    --hash=sha256:b98858b521b5c5f79c4e15927e21196ecd7513dd06e45ab1175f084fc018dbd5
+dagster==0.15.8 \
+    --hash=sha256:b9359b085c1445577750f93ed2bf2bd9f281853ec22b5408843b730ef882f684 \
+    --hash=sha256:d200af7ecfb71180c6a779da4677247525424622edc1e297501249c2d70632b7
     # via
     #   -r requirements/main.in
     #   dagit
     #   dagster-graphql
     #   dagster-postgres
-dagster-graphql==0.15.7 \
-    --hash=sha256:363207fcc1a250dbec7b220187803b69e64a605df54c94035955602a67f9904e \
-    --hash=sha256:ec5adc7388120ca6fe2e5710b21b4d9c61ba9b87dd7568e72b39aa5b690b4d0f
+dagster-graphql==0.15.8 \
+    --hash=sha256:4247a6a315199b9362f5e2752454a2814d7dec6917a1134675ad16e55c8fac80 \
+    --hash=sha256:cb6af67acdeaa6221ce8e6f43c2cf727b20ad066ee5ad5f19565cd6cca3fe511
     # via dagit
-dagster-postgres==0.15.7 \
-    --hash=sha256:0a1848cb2c946d4835dc726b9f97727436ec2d4979d26951740eef2827d4a37c \
-    --hash=sha256:bf3b0b8cc139b478d40700f876aaf0c26467cac22d368c6a56f66e1c1dcddef6
+dagster-postgres==0.15.8 \
+    --hash=sha256:4e2b5f9ad15aeddf518e9a8ffafa5900757ec0ae75b6a46aefcefa18bec66822 \
+    --hash=sha256:c6b859fb3c68b7bf3a5157a761ceef3a1e01abef5747bdba4040593cef4056ff
     # via -r requirements/main.in
 defusedxml==0.7.1 \
     --hash=sha256:1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69 \
@@ -293,9 +293,9 @@ jinja2==3.1.2 \
     #   -r requirements/main.in
     #   dagster
     #   nbconvert
-jsonschema==4.7.2 \
-    --hash=sha256:73764f461d61eb97a057c929368610a134d1d1fffd858acfe88864ee94f1f1d3 \
-    --hash=sha256:c7448a421b25e424fccfceea86b4e3a8672b4436e1988ccbde92c80828d4f085
+jsonschema==4.9.0 \
+    --hash=sha256:5d0be0cd1b670438b71c3d3145b2abba1f9d197e3e91adc4c4bae4c0e114e252 \
+    --hash=sha256:df10e65c8f3687a48e93d0d348ce0ce5f897b5a28e9bbcbbe8f7c7eaf019e850
     # via nbformat
 jupyter-client==7.3.4 \
     --hash=sha256:17d74b0d0a7b24f1c8c527b24fcf4607c56bee542ffe8e3418e50b21e514b621 \
@@ -829,9 +829,9 @@ pyzmq==23.2.0 \
     --hash=sha256:f685003d836ad0e5d4f08d1e024ee3ac7816eb2f873b2266306eef858f058133 \
     --hash=sha256:fee86542dc4ee8229e023003e3939b4d58cc2453922cf127778b69505fc9064b
     # via jupyter-client
-rdflib==6.1.1 \
-    --hash=sha256:8dbfa0af2990b98471dacbc936d6494c997ede92fd8ed693fb84ee700ef6f754 \
-    --hash=sha256:fc81cef513cd552d471f2926141396b633207109d0154c8e77926222c70367fe
+rdflib==6.2.0 \
+    --hash=sha256:62dc3c86d1712db0f55785baf8047f63731fa59b2682be03219cb89262065942 \
+    --hash=sha256:85c34a86dfc517a41e5f2425a41a0aceacc23983462b32e68610b9fad1383bca
     # via -r requirements/main.in
 requests==2.28.1 \
     --hash=sha256:7c5599b102feddaa661c826c56ab4fee28bfd17f5abca1ebbe3e7f19d7c97983 \
@@ -1026,24 +1026,25 @@ watchdog==2.1.9 \
     # via
     #   dagit
     #   dagster
-watchfiles==0.16.0 \
-    --hash=sha256:059bd9596429f8c13604b2eb30888a5661b3c79099edc506f11b63be7afe3ca4 \
-    --hash=sha256:09490d258be8fdd7f5141a39b468dede0b4aa4a52f2b2dbfb0f3835ae7c23eca \
-    --hash=sha256:1bb5f0117c8b93f8e1b22ac0be60cfeb00332959a72e6bbe2073fea27ed086e5 \
-    --hash=sha256:3d3f0397c9128971398a5cbb0fb45852ab2fa4472ac9724c031071e1e39970c0 \
-    --hash=sha256:43d1d517faffa8955c2da0e6f64268e38442d43b50ca73cb686df25f891e49a1 \
-    --hash=sha256:4f712dbe9d8c0365bf46ffe0dd9c6a62cc0acf05ba951f1a53de2b4d5bb63299 \
-    --hash=sha256:59498853d3214d1e4d9b1cb3a06b0011a11f24d31708b1734d9cd7f5a30fe1af \
-    --hash=sha256:5e3d4c92091d16bca1d61920575dab5d6dcbceda76dccd5fb91da0b7390b4ee9 \
-    --hash=sha256:5fa786d102e7eabef22b2147af531aa70194aabcb35335be81c07c26382b0050 \
-    --hash=sha256:750e40db5efcf3f5f11602dbc6fdf8e96a0eefdbccd271093efe9fa2e9d02ed2 \
-    --hash=sha256:7c80e3907d21ca3f1689f42632d239fdc40ffc1d5f32f564997480f85e94c474 \
-    --hash=sha256:8d635dcba3aab2909bf568765547696d7465d30e2e9c6f5ab99da877b58d29bb \
-    --hash=sha256:a5f64674559fac56a6bf2f5e086cb3758740140c80711fe3e016f5443b84ef15 \
-    --hash=sha256:bcd085980389bc64fe509188a9caffa4fe13b2616e2e3e674cde58f916b2a8ee \
-    --hash=sha256:c9e3756cd2ba17e5042e8c9399a08e4bdbe1a366156a164e8373bda30ca096d0 \
-    --hash=sha256:cbdb7814ca43f85ab8569206ab2c3bcd51dd5d1ba582914246784414e6ada62e \
-    --hash=sha256:d5fb4f3b5c884d4f22f643b0697edbb04942bcad961a8f9a9bfadb73e7a1e229
+watchfiles==0.16.1 \
+    --hash=sha256:1e41c8b4bf3e07c18aa51775b36b718830fa727929529a7d6e5b38cf845a06b4 \
+    --hash=sha256:22af3b915f928ef59d427d7228668f87ac8054ed8200808c73fbcaa4f82d5572 \
+    --hash=sha256:2a3debb19912072799d7ca53e99fc5f090f77948f5601392623b2a416b4c86be \
+    --hash=sha256:35f3e411822e14a35f2ef656535aad4e6e79670d6b6ef8e53db958e28916b1fe \
+    --hash=sha256:44c6aff58b8a70a26431737e483a54e8e224279b21873388571ed184fe7c91a7 \
+    --hash=sha256:4a6a1ac96edf5bc3f8e36f4462fc1daad0ec3769ff2adb920571e120e37c91c5 \
+    --hash=sha256:5741246ae399a03395aa5ee35480083a4f29d58ffd41dd3395594f8805f8cdbc \
+    --hash=sha256:70159e759f52b65a50c498182dece80364bfd721e839c254c328cbc7a1716616 \
+    --hash=sha256:75a4b9cec1b1c337ea77d4428b29861553d6bf8179923b1bc7e825e217460e2c \
+    --hash=sha256:91d1b2d0cf060e5222a930a3e2f40f6577da1d18c085c32741b98a128dc1e72c \
+    --hash=sha256:a8a1809bf910672aa0b7ed6e6045d4fc2cf1e0718b99bc443ef17faa5697b68a \
+    --hash=sha256:aed7575e24434c8fec2f2bbb0cecb1521ea1240234d9108db7915a3424d92394 \
+    --hash=sha256:b2c7ad91a867dd688b9a12097dd6a4f89397b43fccee871152aa67197cc94398 \
+    --hash=sha256:baa6d0c1c5140e1dcf6ff802dd7b09fcd95b358e50d42fabc83d83f719451c54 \
+    --hash=sha256:c9a7a6dc63684ff5ba11f0be0e64f744112c3c7a0baf4ec8f6794f9a6257d21e \
+    --hash=sha256:cd7d2fd9a8f28066edc8db5278f3632eb94d10596af760fa0601631f32b1a41e \
+    --hash=sha256:e939a2693404ac11e055f9d1237db8ad7635e2185a6143bde00116e691ea2983 \
+    --hash=sha256:f91035a273001390093a09e52274a34695b0d15ee8736183b640bbc3b8a432ab
     # via uvicorn
 webencodings==0.5.1 \
     --hash=sha256:a0af1213f3c2226497a97e2b3aa01a7e4bee4f403f95be16fc9acd2947514a78 \

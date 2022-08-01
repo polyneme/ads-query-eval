@@ -1,10 +1,8 @@
-from typing import Union
-
 from fastapi import FastAPI
 from jinja2 import Environment, PackageLoader, select_autoescape
 from starlette.responses import HTMLResponse
 
-from ads_query_eval import bootstrap
+from ads_query_eval.app import bootstrap
 
 app = FastAPI()
 
