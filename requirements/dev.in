@@ -1,0 +1,4 @@
+-c main.txt
+black
+flake8
+pytest

@@ -2,10 +2,13 @@ version: "3.7"
 
 services:
   repl:
-    image: jupyter/minimal-notebook
+    build:
+      context: .
+      dockerfile: repl.Dockerfile
+    image: polyneme/ads-query-eval-nb
     volumes:
-      - ./ads-query-eval/repl:/home/jovyan/work
-      - ./ads-query-eval/repl/configure_environment.sh:/usr/local/bin/before-notebook.d/configure_environment.sh
+      - ./ads_query_eval/repl:/home/jovyan/work
+      - ./ads_query_eval/repl/configure_environment.sh:/usr/local/bin/before-notebook.d/configure_environment.sh
     environment:
       ADS_API_TOKEN: "${ADS_API_TOKEN}"
     ports:
@@ -14,9 +17,9 @@ services:
   app:
     ports:
       - "8000:8000"
-    command: ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+    command: ["uvicorn", "ads_query_eval.app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
     volumes:
-      - ./ads-query-eval/app:/code/app
+      - ./ads_query_eval:/code/ads_query_eval
 
   mongo:
     ports:

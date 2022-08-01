@@ -2,8 +2,9 @@ version: "3.7"
 
 services:
   app:
-    build: ./ads-query-eval
+    build: .
     image: polyneme/ads-query-eval
+    command: ["uvicorn", "ads_query_eval.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
     env_file:
       - ./config.env
     expose:
@@ -31,9 +32,10 @@ services:
       POSTGRES_DB: "postgres_db"
 
   dagster-dagit:
-    build: ./dagster
-    image: polyneme/dagster-demo
-    entrypoint: ["tini", "--", "../lib/repo/entrypoint-dagit.sh"]
+    build: .
+    image: polyneme/ads-query-eval
+    working_dir: "/opt/dagster/home/"
+    entrypoint: ["tini", "--", "./entrypoint-dagit.sh"]
     expose:
       - "3000"
     env_file:
@@ -45,13 +47,12 @@ services:
       DAGSTER_POSTGRES_DB: "postgres_db"
     depends_on:
       - dagster-postgresql
-    volumes:
-      - ./dagster:/opt/dagster/lib
 
   dagster-daemon:
-    build: ./dagster
-    image: polyneme/dagster-demo
-    entrypoint: ["tini", "--", "../lib/repo/entrypoint-daemon.sh"]
+    build: .
+    image: polyneme/ads-query-eval
+    working_dir: "/opt/dagster/home/"
+    entrypoint: ["tini", "--", "./entrypoint-daemon.sh"]
     restart: on-failure
     env_file:
       - ./config.env
@@ -61,8 +62,6 @@ services:
       DAGSTER_POSTGRES_DB: "postgres_db"
     depends_on:
       - dagster-postgresql
-    volumes:
-      - ./dagster:/opt/dagster/lib
 
 volumes:
   mongo_data:

@@ -4,3 +4,5 @@ __pycache__
 .htpasswd
 .env
 .DS_Store
+config.env
+.egg-info
