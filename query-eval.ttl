@@ -335,6 +335,7 @@
 
 <revision_of>
 	a owl:ObjectProperty ;
+	rdfs:range owl:Thing ;
 	.
 
 <schedule_job>
