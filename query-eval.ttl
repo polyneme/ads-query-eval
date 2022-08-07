@@ -1,6 +1,6 @@
 # baseURI: https://n2t.net/ark:57802/dw0/query-eval
 
-@base <https://n2t.net/ark:57802/dw0/query-eval> .
+@base <https://n2t.net/ark:57802/dw0/query-eval/> .
 @prefix : <http://ns.polyneme.xyz/dw0/query-eval/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
