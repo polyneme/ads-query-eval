@@ -6,11 +6,17 @@ Demo up at <https://ads-query-eval.polyneme.xyz>.
 ```bash
 cp .env.example .env # and modify .env as appropriate
 source .env
-docker volume create --name=${COMPOSE_PROJECT_NAME}_mongo_data
+docker volume create --name=${COMPOSE_PROJECT_NAME}_terminus_data
 docker volume create --name=${COMPOSE_PROJECT_NAME}_dagster_postgres_data
 docker-compose up -d
 # Confirm resource readiness
 docker-compose logs -f
+```
+
+To get an interactive shell:
+```
+docker-compose exec repl bash
+ipython
 ```
 
 # Production
@@ -18,7 +24,7 @@ docker-compose logs -f
 ```bash
 # Optional: cp .env.example .env # and modify .env as appropriate
 source .env
-docker volume create --name=${COMPOSE_PROJECT_NAME}_mongo_data
+docker volume create --name=${COMPOSE_PROJECT_NAME}_terminus_data
 docker volume create --name=${COMPOSE_PROJECT_NAME}_dagster_postgres_data
 docker volume create --name=${COMPOSE_PROJECT_NAME}_nginx_conf
 docker volume create --name=${COMPOSE_PROJECT_NAME}_letsencrypt_certs

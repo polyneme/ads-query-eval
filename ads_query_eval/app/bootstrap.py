@@ -1,7 +1,7 @@
 from pymongo import ReplaceOne
+from terminusdb_client import WOQLClient
 
-from ads_query_eval.config import get_mongo_db
-from ads_query_eval.frame.models import Query, QueryTopicReviews
+from ads_query_eval.config import get_terminus_client, get_terminus_config
 
 QUERIES = (
     'full:"coronal mass ejection"',
@@ -65,30 +65,49 @@ QUERY_TOPIC_REVIEWS = {
 }
 
 
+def _bootstrap_db():
+    config = get_terminus_config()
+    _client = WOQLClient(server_url=config["server_url"])
+    _client.connect(user="admin", key=config["admin_pass"])
+    exists = _client.get_database(config["dbid"])
+    if exists and config["force_reset_on_init"]:
+        _client.delete_database(dbid=config["dbid"], team="admin", force=True)
+    exists = _client.get_database(config["dbid"])
+    if not exists:
+        print("bootstrapping terminus db")
+        _client.create_database(config["dbid"], team="admin")
+        _client.replace_document(
+            config["schema_objects"],
+            graph_type="schema",
+            commit_msg="Adding schema",
+            create=True,
+        )
+
+
 def _bootstrap_queries():
-    coll_ops = []
-    for i, query in enumerate(QUERIES):
-        q = Query(id=str(i + 1), query=query, run_ids=[])
-        coll_ops.append(
-            ReplaceOne(filter={"query": q.query}, replacement=q.dict(), upsert=True)
-        )
-    db = get_mongo_db()
-    db.queries.create_index("query", unique=True)
-    db.queries.create_index("id", unique=True)
-    db.queries.bulk_write(coll_ops)
+    client = get_terminus_client()
+    client.replace_document(
+        [{"query_literal": q} for q in QUERIES],
+        create=True,
+        commit_msg="Ensure queries",
+    )
 
 
-def _bootstrap_query_topic_reviews():
-    coll_ops = []
-    for query, bibcodes in QUERY_TOPIC_REVIEWS.items():
-        q = QueryTopicReviews(query=query, bibcodes=bibcodes)
-        coll_ops.append(
-            ReplaceOne(filter={"query": q.query}, replacement=q.dict(), upsert=True)
-        )
-    db = get_mongo_db()
-    db.query_topic_reviews.bulk_write(coll_ops)
+def _bootstrap_query_topic_reviews_evaluator():
+    client = get_terminus_client()
+    client.replace_document(
+        {
+            "@type": "EvaluatingProcedure",
+            "fqn": "ads_query_eval.frame.evaluators.topic_review_references",
+            "version": "0.1",
+            "config": QUERY_TOPIC_REVIEWS,
+        },
+        create=True,
+        commit_msg="Ensure evaluator",
+    )
 
 
 def bootstrap():
+    _bootstrap_db()
     _bootstrap_queries()
-    _bootstrap_query_topic_reviews()
+    _bootstrap_query_topic_reviews_evaluator()

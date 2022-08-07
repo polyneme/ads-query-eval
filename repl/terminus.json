@@ -1,0 +1,252 @@
+[
+  {
+    "@type": "@context",
+    "@base": "terminusdb:///data/",
+    "@schema": "terminusdb:///schema#"
+  },
+  {
+    "@type": "Class",
+    "@id": "Query",
+    "@documentation": {
+      "@comment": "a search query",
+      "@properties": {
+        "query_literal": "the literal query string input"
+      }
+    },
+    "@key": {
+      "@type": "Lexical",
+      "@fields": [
+        "query_literal"
+      ]
+    },
+    "query_literal": "xsd:string"
+  },
+  {
+    "@type": "Class",
+    "@abstract": [],
+    "@id": "Operation",
+    "@documentation": {
+      "@comment": "an operation: e.g. a retrieval or an evaluation",
+      "@properties": {
+        "done": "is the operation no longer in progress?",
+        "status": "status of operation",
+        "done_at": "when the operation was considered done, if applicable"
+      }
+    },
+    "done": "xsd:boolean",
+    "done_at": {
+      "@type": "Optional",
+      "@class": "xsd:dateTime"
+    },
+    "status": {
+      "@type": "Enum",
+      "@id": "OperationStatus",
+      "@value": [
+        "unscheduled",
+        "scheduled",
+        "in progress",
+        "completed",
+        "failed",
+        "aborted"
+      ]
+    }
+  },
+  {
+    "@type": "Class",
+    "@id": "Retrieval",
+    "@inherits": [
+      "Operation"
+    ],
+    "@documentation": {
+      "@comment": "a retrieval of a query",
+      "@properties": {
+        "query": "the query"
+      }
+    },
+    "query": "Query"
+  },
+  {
+    "@type": "Class",
+    "@id": "RetrievedItemsList",
+    "@documentation": {
+      "@comment": "list of items retrieved from a query retrieval",
+      "@properties": {
+        "retrieval": "the query retrieval",
+        "mrr": "Mean Reciprical Rank (MRR)"
+      }
+    },
+    "retrieval": "Retrieval",
+    "mrr": {
+      "@type": "Optional",
+      "@class": "xsd:decimal"
+    }
+  },
+  {
+    "@type": "Class",
+    "@id": "RetrievedItem",
+    "@documentation": {
+      "@comment": "instance of a retrievable item; part of a RetrievedItemsList",
+      "@properties": {
+        "retrieved_items_list": "the retrieved list this is a part of",
+        "retrievable_item": "the upstream item of which this is a retrieved instance"
+      }
+    },
+    "retrieved_items_list": "RetrievedItemsList",
+    "retrievable_item": "RetrievableItem"
+  },
+  {
+    "@type": "Class",
+    "@id": "RetrievableItem",
+    "@documentation": {
+      "@comment": "an indexed item that is retrievable from a search query",
+      "@properties": {
+        "ads_bibcode": "the item's unique ADS bibcode"
+      }
+    },
+    "@key": {
+      "@type": "Lexical",
+      "@fields": [
+        "ads_bibcode"
+      ]
+    },
+    "ads_bibcode": "xsd:string"
+  },
+  {
+    "@type": "Class",
+    "@id": "ItemOfEvaluation",
+    "@documentation": {
+      "@comment": "a potential, in-progress, or completed evaluation of a retrieved item",
+      "@properties": {
+        "evaluation": "the retrieved-items-list evaluation that this item-of-evaluation is part of",
+        "retrieved_item": "the RetrievedItem this evaluation is for",
+        "evaluation_status": "the status of this retrieved-item's evaluation",
+        "uncertainty": "the degree of uncertainty of the evaluator, if indicated",
+        "relevance": "how relevant-to-the-query this retrieved item is evaluated to be"
+      }
+    },
+    "evaluation": "Evaluation",
+    "retrieved_item": "RetrievedItem",
+    "evaluation_status": {
+      "@type": "Enum",
+      "@id": "EvaluationStatus",
+      "@value": [
+        "unviewed",
+        "left undone",
+        "done"
+      ]
+    },
+    "uncertainty": {
+      "@type": "Enum",
+      "@id": "Uncertainty",
+      "@value": [
+        "not supplied",
+        "low",
+        "high"
+      ]
+    },
+    "relevance": {
+      "@type": "Enum",
+      "@id": "Relevance",
+      "@value": [
+        "not relevant",
+        "relevant"
+      ]
+    }
+  },
+  {
+    "@type": "Class",
+    "@id": "Evaluator",
+    "@abstract": []
+  },
+  {
+    "@type": "Class",
+    "@id": "User",
+    "@inherits": [
+      "Evaluator"
+    ],
+    "@documentation": {
+      "@comment": "a human evaluator",
+      "@properties": {
+        "email_address": "the user's email address",
+        "hashed_password": "the user's hashed password"
+      }
+    },
+    "email_address": "xsd:string",
+    "hashed_password": "xsd:string"
+  },
+  {
+    "@type": "Class",
+    "@id": "EvaluatingProcedure",
+    "@inherits": [
+      "Evaluator"
+    ],
+    "@documentation": {
+      "@comment": "an automated evaluator",
+      "@properties": {
+        "revision_of": "optional pointer to the EvauatingProcedure that this is a revision of",
+        "fqn": "the procedure's fully qualified name (FQN), e.g. Python dotted path",
+        "version": "the procedure's version, to disambiguate among same-fqn evaluators"
+      }
+    },
+    "@key": {
+      "@type": "Lexical",
+      "@fields": [
+        "fqn",
+        "version"
+      ]
+    },
+    "revision_of": {
+      "@type": "Optional",
+      "@class": "EvaluatingProcedure"
+    },
+    "fqn": "xsd:string",
+    "version": "xsd:string"
+  },
+  {
+    "@type": "Class",
+    "@id": "Evaluation",
+    "@inherits": [
+      "Operation"
+    ],
+    "@documentation": {
+      "@comment": "an automated evaluator",
+      "@properties": {
+        "evaluator": "the Evaluator performing / that performed this evaluation",
+        "r_at_1000": "Recall R@1000",
+        "p_at_25": "Precision P@25"
+      }
+    },
+    "evaluator": "Evaluator",
+    "r_at_1000": {
+      "@type": "Optional",
+      "@class": "xsd:decimal"
+    },
+    "p_at_25": {
+      "@type": "Optional",
+      "@class": "xsd:decimal"
+    }
+  },
+  {
+    "@type": "Class",
+    "@id": "JobRun",
+    "@documentation": {
+      "@comment": "a run of a job, i.e. a run of a configured graph of operations",
+      "@properties": {
+        "operations": "the set of operations for this job",
+        "category": "the category of job"
+      }
+    },
+    "operations": {
+      "@type": "Set",
+      "@class": "Operation"
+    },
+    "category": {
+      "@type": "Enum",
+      "@id": "JobCategory",
+      "@value": [
+        "ScheduledRetrieval",
+        "SensedEvaluationOfRetrievedItemsByProcedure"
+      ]
+    }
+  }
+]

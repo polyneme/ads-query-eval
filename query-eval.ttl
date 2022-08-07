@@ -12,293 +12,319 @@
 	a owl:Ontology ;
 	.
 
-<EvaluatingProcedure>
+<https://n2t.net/ark:57802/dw0/EvaluatingProcedure>
 	a owl:Class ;
-	rdfs:subClassOf <Evaluator> ;
-	owl:disjointWith <User> ;
+	rdfs:subClassOf <https://n2t.net/ark:57802/dw0/Evaluator> ;
+	owl:disjointWith <https://n2t.net/ark:57802/dw0/User> ;
 	owl:equivalentClass [
 		a owl:Restriction ;
-		owl:onProperty <revision_of> ;
-		owl:onClass <EvaluatingProcedure> ;
+		owl:onProperty <https://n2t.net/ark:57802/dw0/revision_of> ;
+		owl:onClass <https://n2t.net/ark:57802/dw0/EvaluatingProcedure> ;
 		owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 	] ;
 	.
 
-<Evaluation>
+<https://n2t.net/ark:57802/dw0/Evaluation>
 	a owl:Class ;
-	rdfs:subClassOf <Operation> ;
-	owl:disjointWith <Retrieval> ;
+	rdfs:subClassOf <https://n2t.net/ark:57802/dw0/Operation> ;
+	owl:disjointWith <https://n2t.net/ark:57802/dw0/Retrieval> ;
 	owl:equivalentClass
 		[
 			a owl:Restriction ;
-			owl:onProperty <p_at_25> ;
+			owl:onProperty <https://n2t.net/ark:57802/dw0/p_at_25> ;
 			owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 			owl:onDataRange xsd:decimal ;
 		] ,
 		[
 			a owl:Restriction ;
-			owl:onProperty <r_at_1000> ;
+			owl:onProperty <https://n2t.net/ark:57802/dw0/r_at_1000> ;
 			owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 			owl:onDataRange xsd:decimal ;
 		] ,
 		[
 			a owl:Restriction ;
-			owl:onProperty <evaluator> ;
-			owl:onClass <Evaluator> ;
+			owl:onProperty <https://n2t.net/ark:57802/dw0/evaluator> ;
+			owl:onClass <https://n2t.net/ark:57802/dw0/Evaluator> ;
 			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 		]
 		;
 	.
 
-<Evaluator>
+<https://n2t.net/ark:57802/dw0/Evaluator>
 	a owl:Class ;
 	owl:equivalentClass
 		[
 			a owl:Restriction ;
-			owl:onProperty <evaluating_procedure> ;
-			owl:onClass <EvaluatingProcedure> ;
+			owl:onProperty <https://n2t.net/ark:57802/dw0/evaluating_procedure> ;
+			owl:onClass <https://n2t.net/ark:57802/dw0/EvaluatingProcedure> ;
 			owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 		] ,
 		[
 			a owl:Restriction ;
-			owl:onProperty <user> ;
-			owl:onClass <User> ;
+			owl:onProperty <https://n2t.net/ark:57802/dw0/user> ;
+			owl:onClass <https://n2t.net/ark:57802/dw0/User> ;
 			owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 		]
 		;
 	.
 
-<ItemOfEvaluation>
+<https://n2t.net/ark:57802/dw0/ItemOfEvaluation>
 	a owl:Class ;
 	owl:equivalentClass
 		[
 			a owl:Restriction ;
-			owl:onProperty <relevance> ;
+			owl:onProperty <https://n2t.net/ark:57802/dw0/relevance> ;
 			owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 			owl:onDataRange xsd:string ;
 		] ,
 		[
 			a owl:Restriction ;
-			owl:onProperty <uncertainty> ;
+			owl:onProperty <https://n2t.net/ark:57802/dw0/uncertainty> ;
 			owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 			owl:onDataRange xsd:string ;
 		] ,
 		[
 			a owl:Restriction ;
-			owl:onProperty <evaluation> ;
-			owl:onClass <Evaluation> ;
+			owl:onProperty <https://n2t.net/ark:57802/dw0/evaluation> ;
+			owl:onClass <https://n2t.net/ark:57802/dw0/Evaluation> ;
 			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 		] ,
 		[
 			a owl:Restriction ;
-			owl:onProperty <retrieved_item> ;
-			owl:onClass <RetrievedItem> ;
+			owl:onProperty <https://n2t.net/ark:57802/dw0/retrieved_item> ;
+			owl:onClass <https://n2t.net/ark:57802/dw0/RetrievedItem> ;
 			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 		] ,
 		[
 			a owl:Restriction ;
-			owl:onProperty <evaluation_status> ;
+			owl:onProperty <https://n2t.net/ark:57802/dw0/evaluation_status> ;
 			owl:onDataRange xsd:string ;
 			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 		]
 		;
 	.
 
-<Job>
+<https://n2t.net/ark:57802/dw0/JobRun>
 	a owl:Class ;
-	.
-
-<Operation>
-	a owl:Class ;
-	.
-
-<Query>
-	a owl:Class ;
-	owl:equivalentClass [
-		a owl:Restriction ;
-		owl:onProperty <query_literal> ;
-		owl:onDataRange xsd:string ;
-		owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-	] ;
-	.
-
-<RetrievableItem>
-	a owl:Class ;
-	owl:equivalentClass [
-		a owl:Restriction ;
-		owl:onProperty <ads_bibcode> ;
-		owl:onDataRange xsd:string ;
-		owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
-	] ;
-	.
-
-<Retrieval>
-	a owl:Class ;
-	rdfs:subClassOf <Operation> ;
 	owl:equivalentClass
 		[
 			a owl:Restriction ;
-			owl:onProperty <completed_at> ;
+			owl:onProperty <https://n2t.net/ark:57802/dw0/operation> ;
+			owl:allValuesFrom <https://n2t.net/ark:57802/dw0/Operation> ;
+		] ,
+		[
+			a owl:Restriction ;
+			owl:onProperty <category> ;
+			owl:onDataRange xsd:string ;
+			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+		]
+		;
+	.
+
+<https://n2t.net/ark:57802/dw0/Operation>
+	a owl:Class ;
+	owl:equivalentClass
+		[
+			a owl:Restriction ;
+			owl:onProperty <done_at> ;
 			owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 			owl:onDataRange xsd:dateTime ;
 		] ,
 		[
 			a owl:Restriction ;
-			owl:onProperty <query> ;
-			owl:onClass <Query> ;
+			owl:onProperty <done> ;
+			owl:onDataRange xsd:boolean ;
 			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 		] ,
 		[
 			a owl:Restriction ;
-			owl:onProperty <retrieval_status> ;
+			owl:onProperty <status> ;
 			owl:onDataRange xsd:string ;
 			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 		]
 		;
 	.
 
-<RetrievedItem>
+<https://n2t.net/ark:57802/dw0/Query>
+	a owl:Class ;
+	owl:equivalentClass [
+		a owl:Restriction ;
+		owl:onProperty <https://n2t.net/ark:57802/dw0/query_literal> ;
+		owl:onDataRange xsd:string ;
+		owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+	] ;
+	.
+
+<https://n2t.net/ark:57802/dw0/RetrievableItem>
+	a owl:Class ;
+	owl:equivalentClass [
+		a owl:Restriction ;
+		owl:onProperty <https://n2t.net/ark:57802/dw0/ads_bibcode> ;
+		owl:onDataRange xsd:string ;
+		owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+	] ;
+	.
+
+<https://n2t.net/ark:57802/dw0/Retrieval>
+	a owl:Class ;
+	rdfs:subClassOf <https://n2t.net/ark:57802/dw0/Operation> ;
+	owl:equivalentClass [
+		a owl:Restriction ;
+		owl:onProperty <https://n2t.net/ark:57802/dw0/query> ;
+		owl:onClass <https://n2t.net/ark:57802/dw0/Query> ;
+		owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+	] ;
+	.
+
+<https://n2t.net/ark:57802/dw0/RetrievedItem>
 	a owl:Class ;
 	owl:equivalentClass
 		[
 			a owl:Restriction ;
-			owl:onProperty <retrievable_item> ;
-			owl:onClass <RetrievableItem> ;
+			owl:onProperty <https://n2t.net/ark:57802/dw0/retrievable_item> ;
+			owl:onClass <https://n2t.net/ark:57802/dw0/RetrievableItem> ;
 			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 		] ,
 		[
 			a owl:Restriction ;
-			owl:onProperty <retrieved_items_list> ;
-			owl:onClass <RetrievedItemsList> ;
+			owl:onProperty <https://n2t.net/ark:57802/dw0/retrieved_items_list> ;
+			owl:onClass <https://n2t.net/ark:57802/dw0/RetrievedItemsList> ;
 			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 		]
 		;
 	.
 
-<RetrievedItemsList>
+<https://n2t.net/ark:57802/dw0/RetrievedItemsList>
 	a owl:Class ;
 	owl:equivalentClass
 		[
 			a owl:Restriction ;
-			owl:onProperty <mrr> ;
+			owl:onProperty <https://n2t.net/ark:57802/dw0/mrr> ;
 			owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 			owl:onDataRange xsd:decimal ;
 		] ,
 		[
 			a owl:Restriction ;
-			owl:onProperty <retrieval> ;
-			owl:onClass <Retrieval> ;
+			owl:onProperty <https://n2t.net/ark:57802/dw0/retrieval> ;
+			owl:onClass <https://n2t.net/ark:57802/dw0/Retrieval> ;
 			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 		]
 		;
 	.
 
-<ScheduledRetrieval>
+<https://n2t.net/ark:57802/dw0/User>
 	a owl:Class ;
-	rdfs:subClassOf <Job> ;
-	owl:disjointWith <SensedEvaluationOfRetrievedItemsByProcedure> ;
-	.
-
-<SensedEvaluationOfRetrievedItemsByProcedure>
-	a owl:Class ;
-	rdfs:subClassOf <Job> ;
-	.
-
-<User>
-	a owl:Class ;
-	rdfs:subClassOf <Evaluator> ;
+	rdfs:subClassOf <https://n2t.net/ark:57802/dw0/Evaluator> ;
 	owl:equivalentClass
 		[
 			a owl:Restriction ;
-			owl:onProperty <email_address> ;
+			owl:onProperty <https://n2t.net/ark:57802/dw0/email_address> ;
 			owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 			owl:onDataRange xsd:string ;
 		] ,
 		[
 			a owl:Restriction ;
-			owl:onProperty <hashed_password> ;
+			owl:onProperty <https://n2t.net/ark:57802/dw0/hashed_password> ;
 			owl:onDataRange xsd:string ;
 			owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
 		]
 		;
 	.
 
-<ads_bibcode>
+<https://n2t.net/ark:57802/dw0/ads_bibcode>
 	a owl:DatatypeProperty ;
 	rdfs:range xsd:string ;
 	.
 
-<completed_at>
-	a owl:DatatypeProperty ;
-	rdfs:range xsd:dateTime ;
-	.
-
-<email_address>
+<https://n2t.net/ark:57802/dw0/email_address>
 	a owl:DatatypeProperty ;
 	rdfs:subPropertyOf owl:topDataProperty ;
 	rdfs:range xsd:string ;
 	.
 
-<evaluating_procedure>
+<https://n2t.net/ark:57802/dw0/evaluating_procedure>
 	a owl:ObjectProperty ;
-	rdfs:range <EvaluatingProcedure> ;
+	rdfs:range <https://n2t.net/ark:57802/dw0/EvaluatingProcedure> ;
 	.
 
-<evaluation>
+<https://n2t.net/ark:57802/dw0/evaluation>
 	a owl:ObjectProperty ;
-	rdfs:range <Evaluation> ;
+	rdfs:range <https://n2t.net/ark:57802/dw0/Evaluation> ;
 	.
 
-<evaluation_status>
+<https://n2t.net/ark:57802/dw0/evaluation_status>
 	a owl:DatatypeProperty ;
 	rdfs:range xsd:string ;
 	.
 
-<evaluator>
+<https://n2t.net/ark:57802/dw0/evaluator>
 	a owl:ObjectProperty ;
-	rdfs:range <Evaluator> ;
+	rdfs:range <https://n2t.net/ark:57802/dw0/Evaluator> ;
 	.
 
-<hashed_password>
+<https://n2t.net/ark:57802/dw0/hashed_password>
 	a owl:DatatypeProperty ;
 	rdfs:range xsd:string ;
 	.
 
-<mrr>
+<https://n2t.net/ark:57802/dw0/mrr>
 	a owl:DatatypeProperty ;
 	rdfs:label "Mean Reciprocal Rank" ;
 	rdfs:range xsd:decimal ;
 	.
 
-<operation>
+<https://n2t.net/ark:57802/dw0/operation>
 	a owl:ObjectProperty ;
-	rdfs:range <Operation> ;
+	rdfs:range <https://n2t.net/ark:57802/dw0/Operation> ;
 	.
 
-<p_at_25>
+<https://n2t.net/ark:57802/dw0/p_at_25>
 	a owl:DatatypeProperty ;
 	rdfs:subPropertyOf owl:topDataProperty ;
 	rdfs:label "Precision P@25" ;
 	rdfs:range xsd:decimal ;
 	.
 
-<query>
+<https://n2t.net/ark:57802/dw0/query>
 	a owl:ObjectProperty ;
-	rdfs:range <Query> ;
+	rdfs:range <https://n2t.net/ark:57802/dw0/Query> ;
 	.
 
-<query_literal>
+<category>
+	a owl:DatatypeProperty ;
+	rdfs:subPropertyOf owl:topDataProperty ;
+	rdfs:comment "ScheduledRetrieval | SensedEvaluationOfRetrievedItemsByProcedure" ;
+	rdfs:range xsd:string ;
+	.
+
+<done>
+	a owl:DatatypeProperty ;
+	rdfs:range xsd:boolean ;
+	.
+
+<done_at>
+	a owl:DatatypeProperty ;
+	rdfs:range xsd:dateTime ;
+	.
+
+<status>
+	a owl:DatatypeProperty ;
+	rdfs:comment "'completed' | 'failed' | 'aborted' | 'in progress' | 'scheduled' | 'unscheduled'" ;
+	rdfs:range xsd:string ;
+	.
+
+<https://n2t.net/ark:57802/dw0/query_literal>
 	a owl:DatatypeProperty ;
 	rdfs:range xsd:string ;
 	.
 
-<r_at_1000>
+<https://n2t.net/ark:57802/dw0/r_at_1000>
 	a owl:DatatypeProperty ;
 	rdfs:label "Recall R@1000" ;
 	rdfs:range xsd:decimal ;
 	.
 
-<relevance>
+<https://n2t.net/ark:57802/dw0/relevance>
 	a owl:DatatypeProperty ;
 	rdfs:comment
 		"'0' | '1'" ,
@@ -307,48 +333,42 @@
 	rdfs:range xsd:string ;
 	.
 
-<retrievable_item>
+<https://n2t.net/ark:57802/dw0/retrievable_item>
 	a owl:ObjectProperty ;
-	rdfs:range <RetrievableItem> ;
+	rdfs:range <https://n2t.net/ark:57802/dw0/RetrievableItem> ;
 	.
 
-<retrieval>
+<https://n2t.net/ark:57802/dw0/retrieval>
 	a owl:ObjectProperty ;
-	rdfs:range <Retrieval> ;
+	rdfs:range <https://n2t.net/ark:57802/dw0/Retrieval> ;
 	.
 
-<retrieval_status>
-	a owl:DatatypeProperty ;
-	rdfs:comment "'completed' | 'failed' | 'aborted' | 'running' | 'scheduled' | 'unscheduled'" ;
-	rdfs:range xsd:string ;
-	.
-
-<retrieved_item>
+<https://n2t.net/ark:57802/dw0/retrieved_item>
 	a owl:ObjectProperty ;
-	rdfs:range <RetrievedItem> ;
+	rdfs:range <https://n2t.net/ark:57802/dw0/RetrievedItem> ;
 	.
 
-<retrieved_items_list>
+<https://n2t.net/ark:57802/dw0/retrieved_items_list>
 	a owl:ObjectProperty ;
-	rdfs:range <RetrievedItemsList> ;
+	rdfs:range <https://n2t.net/ark:57802/dw0/RetrievedItemsList> ;
 	.
 
-<revision_of>
+<https://n2t.net/ark:57802/dw0/revision_of>
 	a owl:ObjectProperty ;
 	rdfs:range owl:Thing ;
 	.
 
-<schedule_job>
+<https://n2t.net/ark:57802/dw0/schedule_job>
 	a owl:ObjectProperty ;
-	rdfs:range <Job> ;
+	rdfs:range <https://n2t.net/ark:57802/dw0/JobRun> ;
 	.
 
-<sensor_job>
+<https://n2t.net/ark:57802/dw0/sensor_job>
 	a owl:ObjectProperty ;
-	rdfs:range <Job> ;
+	rdfs:range <https://n2t.net/ark:57802/dw0/JobRun> ;
 	.
 
-<uncertainty>
+<https://n2t.net/ark:57802/dw0/uncertainty>
 	a owl:DatatypeProperty ;
 	rdfs:comment
 		"'0' | '1'" ,
@@ -357,8 +377,8 @@
 	rdfs:range xsd:string ;
 	.
 
-<user>
+<https://n2t.net/ark:57802/dw0/user>
 	a owl:ObjectProperty ;
-	rdfs:range <User> ;
+	rdfs:range <https://n2t.net/ark:57802/dw0/User> ;
 	.
 

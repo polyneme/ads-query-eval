@@ -3,6 +3,7 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 from starlette.responses import HTMLResponse
 
 from ads_query_eval.app import bootstrap
+from ads_query_eval.config import get_terminus_client
 
 app = FastAPI()
 
@@ -10,39 +11,6 @@ jinja_env = Environment(
     loader=PackageLoader("ads_query_eval", "app/templates"),
     autoescape=select_autoescape(),
 )
-
-queries = {
-    1: {
-        "id": 1,
-        "summary": "This query is doing well",
-        "runs": [
-            {
-                "id": 2,
-                "summary": (
-                    "This query run happened an hour ago and no one has evaluated it yet, "
-                    "but our M heuristic functions have run."
-                ),
-                "evals": [
-                    {"id": 1, "summary": "heuristic function A says this."},
-                    {"id": 2, "summary": "heuristic function B says this."},
-                ],
-            },
-            {
-                "id": 1,
-                "summary": (
-                    "This query run happened last week and was reviewed for relevance "
-                    "by 3 people."
-                ),
-                "evals": [
-                    {"id": 1, "summary": "ryan submitted this."},
-                    {"id": 1, "summary": "edwin submitted this."},
-                    {"id": 1, "summary": "brian submitted this."},
-                ],
-            },
-        ],
-    },
-    2: {"id": 2, "summary": "This query needs attention", "runs": []},
-}
 
 
 @app.on_event("startup")
@@ -52,13 +20,17 @@ def _bootstrap():
 
 @app.get("/")
 def all_queries():
+    client = get_terminus_client()
     template = jinja_env.get_template("queries.jinja2")
+    queries = list(client.get_documents_by_type("Query"))
+    for q in queries:
+        q["id"] = q["@id"].split("/", maxsplit=1)[1]
     html_content = template.render(
         summary_of_all_queries=(
             "This is where summary information on all queries, their runs, "
             "and their evaluation, is presented."
         ),
-        queries=list(queries.values()),
+        queries=queries,
     )
     return HTMLResponse(content=html_content, status_code=200)
 

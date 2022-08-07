@@ -10,21 +10,21 @@ services:
       - ./repl:/home/jovyan/work
       - ./repl/configure_environment.sh:/usr/local/bin/before-notebook.d/configure_environment.sh
       - ./ads_query_eval:/code/ads_query_eval
-    environment:
-      ADS_API_TOKEN: "${ADS_API_TOKEN}"
+    env_file:
+      - ./config.env
     ports:
       - "8998:8888"
 
   app:
     ports:
       - "8000:8000"
-    command: ["uvicorn", "ads_query_eval.app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+    command: ["./wait-for-it.sh" , "terminus:6363" , "--strict" , "--timeout=300" , "--", "uvicorn", "ads_query_eval.app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
     volumes:
       - ./ads_query_eval:/code/ads_query_eval
 
-  mongo:
+  terminus:
     ports:
-      - "57018:27017"
+      - "6364:6363"
 
   dagster-dagit:
     ports:

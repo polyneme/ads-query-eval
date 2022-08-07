@@ -4,23 +4,27 @@ services:
   app:
     build: .
     image: polyneme/ads-query-eval
-    command: ["uvicorn", "ads_query_eval.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    command: ["./wait-for-it.sh" , "terminus:6363" , "--strict" , "--timeout=300" , "--" , "uvicorn", "ads_query_eval.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
     env_file:
       - ./config.env
     expose:
       - "8000"
     restart: unless-stopped
+    depends_on:
+      - terminus
 
-  mongo:
-    image: mongo:4.4-bionic
-    expose:
-      - "27017"
+  terminus:
+    image: terminusdb/terminusdb-server:v10.1.1
+    tty: true
     volumes:
-      - mongo_data:/data/db
+      - terminus_data:/app/terminusdb/storage
     restart: always
+    env_file:
+      - ./config.env
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: root
+      TERMINUSDB_SERVER_PORT: 6363
+      TERMINUSDB_AUTOLOGIN_ENABLED: "true"
+      TERMINUSDB_HTTPS_ENABLED: "false"
 
   dagster-postgresql:
     image: postgres:11
@@ -64,8 +68,8 @@ services:
       - dagster-postgresql
 
 volumes:
-  mongo_data:
-    name: ${COMPOSE_PROJECT_NAME}_mongo_data
+  terminus_data:
+    name: ${COMPOSE_PROJECT_NAME}_terminus_data
     external: true
   dagster_postgres_data:
     name: ${COMPOSE_PROJECT_NAME}_dagster_postgres_data

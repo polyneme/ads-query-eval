@@ -1,7 +1,7 @@
 dagit>=0.15
 dagster>=0.15
 dagster-postgres>=0.15
-fastapi>=0.75.0,<0.76.0 # until using starlette >=0.20.2
+fastapi>=0.75.0,<0.76.0 # until using starlette >=0.20.3
 gql<3 # weird issue from dagster 0.15.7
 jinja2
 openpyxl
@@ -9,6 +9,7 @@ pandas
 pymongo
 rdflib
 requests
+terminusdb-client
 toolz
 tqdm
 uvicorn

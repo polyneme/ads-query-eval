@@ -6,3 +6,4 @@ __pycache__
 .DS_Store
 config.env
 *.egg-info
+query-eval.properties
