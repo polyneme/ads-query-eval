@@ -5,6 +5,7 @@ from urllib.parse import urlencode
 
 import requests
 from gridfs import GridFS
+from terminusdb_client import WOQLClient
 
 from ads_query_eval.config import QUERY_BASE_URL, HEADERS
 
@@ -29,6 +30,11 @@ def params_for(q=""):
         "sort": "score desc",
         "start": "0",
     }
+
+
+def find_one(client: WOQLClient, document_template: dict):
+    rv = client.query_document(document_template, count=1, as_list=True)
+    return rv[0] if len(rv) > 0 else None
 
 
 def fetch_first_page(q):

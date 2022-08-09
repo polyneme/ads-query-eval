@@ -36,6 +36,10 @@ services:
       - ./:/workdir:ro
     restart: unless-stopped
 
+  snappass:
+      environment:
+        HOST_OVERRIDE: "snappass.polyneme.xyz"
+
 volumes:
   nginx_conf:
     name: ${COMPOSE_PROJECT_NAME}_nginx_conf

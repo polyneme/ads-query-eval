@@ -13,6 +13,10 @@ docker-compose up -d
 docker-compose logs -f
 ```
 
+Gotchas:
+
+- If you change `TERMINUSDB_ADMIN_PASS`, you need to remove and recreate the `terminus_data` volume.
+
 To get an interactive shell:
 ```
 docker-compose exec repl bash

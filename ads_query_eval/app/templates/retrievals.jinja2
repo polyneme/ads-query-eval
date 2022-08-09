@@ -1,13 +1,13 @@
 {% extends 'base.jinja2' %}
 
 {% block header %}
- {% include 'runs_summary.jinja2' %}
+ {% include 'retrievals_summary.jinja2' %}
 {% endblock %}
 
 {% block content %}
   <div class="p-4">
     {% for run in runs %}
-        {% include 'run_summary.jinja2' %}
+        {% include 'retrieval_summary.jinja2' %}
     {% else %}
         No runs found.
     {% endfor %}

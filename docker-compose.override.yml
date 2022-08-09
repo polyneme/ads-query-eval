@@ -29,3 +29,10 @@ services:
   dagster-dagit:
     ports:
       - "3000:3000"
+
+  snappass:
+    environment:
+      NO_SSL: "True"
+      HOST_OVERRIDE: "localhost:5000"
+    ports:
+      - "5000:5000"

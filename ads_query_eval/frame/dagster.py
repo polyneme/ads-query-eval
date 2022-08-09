@@ -8,45 +8,54 @@ from dagster import (
     OpExecutionContext,
     io_manager,
     IOManager,
+    SourceAsset,
+    AssetKey,
+    asset,
+    AssetIn,
+    define_asset_job,
+    ScheduleDefinition,
+    with_resources,
+    static_partitioned_config,
+    job,
+    schedule,
 )
 from gridfs import GridFS
 
 from ads_query_eval.app.bootstrap import bootstrap
-from ads_query_eval.config import get_mongo_db
-from ads_query_eval.lib.fetch import fetch_first_n
+from ads_query_eval.config import get_s3_client, get_terminus_client
+from ads_query_eval.lib.io import fetch_first_n
 
+from ads_query_eval.frame import s3
 from ads_query_eval.lib.io import gfs_put_as_gzipped_json, fetch_first_page
 from ads_query_eval.frame.models import Query
+from ads_query_eval.lib.util import hash_of
 
 bootstrap()
 
 
 @resource
-def mongo_db():
-    return get_mongo_db()
+def s3_resource():
+    return get_s3_client()
 
 
 @resource
-def mongo_gfs():
-    return GridFS(get_mongo_db())
+def terminus_resource():
+    return get_terminus_client()
 
 
-class MongoGFSIOManager(IOManager):
-    def __init__(self):
-        self.gfs = GridFS(get_mongo_db())
-
+class S3PickleIOManager(IOManager):
     def handle_output(self, context, obj):
-        filename = "__".join(context.get_identifier())
-        self.gfs.put(pickle.dumps(obj), filename=filename)
+        key = "__".join(context.get_identifier())
+        s3.put(key=key, body=pickle.dumps(obj))
 
     def load_input(self, context):
-        filename = "__".join(context.get_identifier())
-        return pickle.loads(self.gfs.get_last_version(filename=filename).read())
+        key = "__".join(context.get_identifier())
+        return pickle.loads(s3.get(key=key).read())
 
 
 @io_manager
-def mongo_gfs_io_manager():
-    return MongoGFSIOManager()
+def s3_pickle_io_manager():
+    return S3PickleIOManager()
 
 
 @op(config_schema={"query": str, "query_id": str}, required_resource_keys={"db"})
@@ -142,28 +151,33 @@ def get_and_log_query_results():
 
 @repository
 def default():
-    db = get_mongo_db()
-    queries = [Query(**d) for d in db.queries.find()]
-    jobs = []
-    for q in queries:
-        common_op_config = {"query": q.query, "query_id": q.id}
-        jobs.append(
-            get_and_log_query_results.to_job(
-                name=f"get_and_log_query_{q.id:02}_results",
-                resource_defs={
-                    "db": mongo_db,
-                    "gfs": mongo_gfs,
-                    "io_manager": mongo_gfs_io_manager,
-                },
-                config={
-                    "ops": {
-                        "get_query_responses": {"config": common_op_config},
-                        "query_responses_to_analysis_dict": {
-                            "config": common_op_config
-                        },
-                    }
-                },
-            )
-        )
+    client = get_terminus_client()
+    queries = client.get_documents_by_type("Query", as_list=True)
+    query_literals = [q["query_literal"] for q in queries]
 
-    return jobs
+    @static_partitioned_config(partition_keys=query_literals)
+    def retrieval_config(partition_key: str):
+        return {"ops": {"retrieval_op": {"config": {"query_literal": partition_key}}}}
+
+    @op(config_schema={"query_literal": str}, required_resource_keys={"s3", "terminus"})
+    def retrieval_op(context):
+        q = context.op_config["query_literal"]
+        context.log.info(q)
+        # rv = fetch_first_n(q=q, n=1000, logger=context.log)
+
+    @job(
+        config=retrieval_config,
+        resource_defs={"s3": s3_resource, "terminus": terminus_resource},
+    )
+    def retrieval_job():
+        retrieval_op()
+
+    @schedule(cron_schedule="0 0 * * *", job=retrieval_job)
+    def retrieval_schedule():
+        for q in query_literals:
+            request = retrieval_job.run_request_for_partition(
+                partition_key=q, run_key=hash_of(q)
+            )
+            yield request
+
+    return [retrieval_schedule]

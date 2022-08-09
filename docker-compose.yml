@@ -67,6 +67,18 @@ services:
     depends_on:
       - dagster-postgresql
 
+  snappass:
+      image: polyneme/snappass
+      stop_signal: SIGINT
+      environment:
+        REDIS_HOST: "snappass-redis"
+        SECRET_KEY: ${SECRET_KEY}
+      depends_on:
+        - snappass-redis
+
+  snappass-redis:
+      image: "redis:latest"
+
 volumes:
   terminus_data:
     name: ${COMPOSE_PROJECT_NAME}_terminus_data
