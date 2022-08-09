@@ -8,17 +8,24 @@ import ssl
 
 import requests
 from bs4 import BeautifulSoup
-from fastapi import FastAPI, HTTPException, Form
+from fastapi import FastAPI, HTTPException, Form, Depends
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from jinja2 import Environment, PackageLoader, select_autoescape
 from starlette import status
-from starlette.responses import HTMLResponse
+from starlette.responses import HTMLResponse, RedirectResponse
 from toolz import assoc
 
 from ads_query_eval.app import bootstrap
-from ads_query_eval.config import get_terminus_client, SITE_URL, get_smtp_config
+from ads_query_eval.config import (
+    get_terminus_client,
+    SITE_URL,
+    get_smtp_config,
+    get_invite_link_credentials,
+)
 from ads_query_eval.lib.io import find_one
 from ads_query_eval.lib.util import get_password_hash
 
+security = HTTPBasic()
 app = FastAPI()
 
 jinja_env = Environment(
@@ -30,6 +37,29 @@ jinja_env = Environment(
 @app.on_event("startup")
 def _bootstrap():
     bootstrap.bootstrap()
+
+
+@app.get("/invite_link/new")
+def new_invite_link(credentials: HTTPBasicCredentials = Depends(security)):
+    username, password = get_invite_link_credentials()
+    correct_username = secrets.compare_digest(credentials.username, username)
+    correct_password = secrets.compare_digest(credentials.password, password)
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
+    token = secrets.token_urlsafe()
+    client = get_terminus_client()
+    client.insert_document(
+        {
+            "@type": "InviteLink",
+            "token": token,
+        }
+    )
+    return RedirectResponse(SITE_URL + f"/invite_link/{token}")
 
 
 @app.get("/invite_link/{token}")

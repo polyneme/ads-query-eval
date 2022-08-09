@@ -83,3 +83,8 @@ def get_s3_client():
         aws_access_key_id=_conf["s3_access_key_id"],
         aws_secret_access_key=_conf["s3_secret_access_key"],
     )
+
+
+@lru_cache
+def get_invite_link_credentials():
+    return os.getenv("INVITE_LINK_USER"), os.getenv("INVITE_LINK_PASS")

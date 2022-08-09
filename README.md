@@ -32,7 +32,7 @@ docker volume create --name=${COMPOSE_PROJECT_NAME}_terminus_data
 docker volume create --name=${COMPOSE_PROJECT_NAME}_dagster_postgres_data
 docker volume create --name=${COMPOSE_PROJECT_NAME}_nginx_conf
 docker volume create --name=${COMPOSE_PROJECT_NAME}_letsencrypt_certs
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build --force-recreate
 # Confirm resource readiness and certificate installation
 docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs -f
 ```
