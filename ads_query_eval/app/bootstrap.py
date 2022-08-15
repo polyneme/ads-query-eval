@@ -14,10 +14,10 @@ QUERIES = (
     'full:("interplanetary magnetic field" AND reconnection)',
     'full:"substorm"',
     'full:"particle acceleration"',
-    #'similar(bibcode:2015AdSpR..55.2745S)',
-    #'useful(topn(200,similar(1958ApJ...128..664P)))',
-    #'useful(topn(200,similar(1961PhRvL...6...47D)))',
-    #'trending(full:"space weather")'
+    'similar(bibcode:2015AdSpR..55.2745S)',
+    'useful(topn(200,similar(1958ApJ...128..664P)))',
+    'useful(topn(200,similar(1961PhRvL...6...47D)))',
+    'trending(full:"space weather")'
 )
 
 QUERY_TOPIC_REVIEWS = {
@@ -61,6 +61,29 @@ QUERY_TOPIC_REVIEWS = {
     'full:"particle acceleration"': [
         "bibcode:2012SSRv..173..433F",
         "bibcode:2012SSRv..173..103M",
+    ],
+    'similar(bibcode:2015AdSpR..55.2745S)': [
+        "bibcode:2006LRSP....3....2S",
+        "bibcode:2021LRSP...18....4T",
+        "bibcode:2007LRSP....4....1P",
+        "bibcode:2018SSRv..214...21R",
+    ],
+    'useful(topn(200,similar(1958ApJ...128..664P)))': [
+        "bibcode:2021LRSP...18....3V",
+        "bibcode:2012SSRv..173..433F",
+    ],
+    'useful(topn(200,similar(1961PhRvL...6...47D)))': [
+        "bibcode:2007LRSP....4....1P",
+        "bibcode:2018SSRv..214...17B",
+        "bibcode:2004SpWea...211004T",
+        "bibcode:2015SSRv..190....1K",
+    ],
+    'trending(full:"space weather")': [
+        "bibcode:2022LRSP...19....2C",
+        "bibcode:2021ARA&A..59..445H",
+        "bibcode:2015AdSpR..55.2745S",
+        "bibcode:2007LRSP....4....1P",
+        "bibcode:2021PEPS....8...21S",
     ],
 }
 
