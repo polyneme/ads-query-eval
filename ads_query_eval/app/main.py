@@ -1,3 +1,4 @@
+import json
 from email.headerregistry import Address
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -21,7 +22,9 @@ from ads_query_eval.config import (
     SITE_URL,
     get_smtp_config,
     get_invite_link_credentials,
+    get_s3_client,
 )
+from ads_query_eval.frame import s3
 from ads_query_eval.lib.io import find_one
 from ads_query_eval.lib.util import get_password_hash
 
@@ -158,9 +161,12 @@ def all_queries():
 
 @app.get("/queries/{query_literal}")
 def query_retrievals(query_literal: str):
-    client = get_terminus_client()
+    terminus_client = get_terminus_client()
+    s3_client = get_s3_client()
     query = list(
-        client.query_document({"@type": "Query", "query_literal": query_literal})
+        terminus_client.query_document(
+            {"@type": "Query", "query_literal": query_literal}
+        )
     )
     if not query:
         raise HTTPException(
@@ -168,9 +174,13 @@ def query_retrievals(query_literal: str):
         )
     query = query[0]
     retrievals = list(
-        client.query_document({"@type": "Retrieval", "query": query["@id"]})
+        terminus_client.query_document({"@type": "Retrieval", "query": query["@id"]})
     )
-    print(retrievals)
+    for r in retrievals:
+        b = s3.get(client=s3_client, key=r["s3_key"])
+        payload = json.loads(b.getvalue())
+        print(payload[0]["response"]["docs"][0].keys())
+        r["payload"] = payload
     template = jinja_env.get_template("retrievals.jinja2")
     html_content = template.render(
         summary_of_all_query_runs=(

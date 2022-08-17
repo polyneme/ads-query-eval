@@ -19,7 +19,7 @@ HEADERS = {
 SITE_URL = os.environ.get("SITE_URL")
 
 
-@lru_cache()
+@lru_cache
 def get_terminus_config():
     with (Path(__file__).resolve().parent / "frame" / "terminus.json").open() as f:
         schema_objects = json.load(f)

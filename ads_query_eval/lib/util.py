@@ -13,6 +13,10 @@ def now(as_str=False):
     return dt.isoformat() if as_str else dt
 
 
+def today_as_str() -> str:
+    return now(as_str=True).split("T", maxsplit=1)[0]
+
+
 def import_via_dotted_path(dotted_path: str):
     module_name, _, member_name = dotted_path.rpartition(".")
     return getattr(import_module(module_name), member_name)

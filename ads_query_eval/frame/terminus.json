@@ -10,7 +10,8 @@
     "@documentation": {
       "@comment": "a search query",
       "@properties": {
-        "query_literal": "the literal query string input"
+        "query_literal": "the literal query string input",
+        "query_literal_md5": "The MD5 hash of the query string input. Useful when a limited-charset key is needed."
       }
     },
     "@key": {
@@ -19,7 +20,8 @@
         "query_literal"
       ]
     },
-    "query_literal": "xsd:string"
+    "query_literal": "xsd:string",
+    "query_literal_md5": "xsd:string"
   },
   {
     "@type": "Class",
@@ -60,10 +62,12 @@
     "@documentation": {
       "@comment": "a retrieval of a query",
       "@properties": {
-        "query": "the query"
+        "query": "the query",
+        "s3_key": "The S3 Key (not including bucket name and configured prefix) where the retrieval payload is stored"
       }
     },
-    "query": "Query"
+    "query": "Query",
+    "s3_key": "xsd:string"
   },
   {
     "@type": "Class",
@@ -88,11 +92,13 @@
       "@comment": "instance of a retrievable item; part of a RetrievedItemsList",
       "@properties": {
         "retrieved_items_list": "the retrieved list this is a part of",
-        "retrievable_item": "the upstream item of which this is a retrieved instance"
+        "retrievable_item": "the upstream item of which this is a retrieved instance",
+        "content": "the retrieved item content as JSON"
       }
     },
     "retrieved_items_list": "RetrievedItemsList",
-    "retrievable_item": "RetrievableItem"
+    "retrievable_item": "RetrievableItem",
+    "content": "sys:JSON"
   },
   {
     "@type": "Class",

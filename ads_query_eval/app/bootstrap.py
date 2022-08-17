@@ -2,6 +2,7 @@ from pymongo import ReplaceOne
 from terminusdb_client import WOQLClient
 
 from ads_query_eval.config import get_terminus_client, get_terminus_config
+from ads_query_eval.lib.util import hash_of
 
 QUERIES = (
     'full:"coronal mass ejection"',
@@ -14,10 +15,10 @@ QUERIES = (
     'full:("interplanetary magnetic field" AND reconnection)',
     'full:"substorm"',
     'full:"particle acceleration"',
-    'similar(bibcode:2015AdSpR..55.2745S)',
-    'useful(topn(200,similar(1958ApJ...128..664P)))',
-    'useful(topn(200,similar(1961PhRvL...6...47D)))',
-    'trending(full:"space weather")'
+    "similar(bibcode:2015AdSpR..55.2745S)",
+    "useful(topn(200,similar(1958ApJ...128..664P)))",
+    "useful(topn(200,similar(1961PhRvL...6...47D)))",
+    'trending(full:"space weather")',
 )
 
 QUERY_TOPIC_REVIEWS = {
@@ -62,17 +63,17 @@ QUERY_TOPIC_REVIEWS = {
         "bibcode:2012SSRv..173..433F",
         "bibcode:2012SSRv..173..103M",
     ],
-    'similar(bibcode:2015AdSpR..55.2745S)': [
+    "similar(bibcode:2015AdSpR..55.2745S)": [
         "bibcode:2006LRSP....3....2S",
         "bibcode:2021LRSP...18....4T",
         "bibcode:2007LRSP....4....1P",
         "bibcode:2018SSRv..214...21R",
     ],
-    'useful(topn(200,similar(1958ApJ...128..664P)))': [
+    "useful(topn(200,similar(1958ApJ...128..664P)))": [
         "bibcode:2021LRSP...18....3V",
         "bibcode:2012SSRv..173..433F",
     ],
-    'useful(topn(200,similar(1961PhRvL...6...47D)))': [
+    "useful(topn(200,similar(1961PhRvL...6...47D)))": [
         "bibcode:2007LRSP....4....1P",
         "bibcode:2018SSRv..214...17B",
         "bibcode:2004SpWea...211004T",
@@ -94,7 +95,7 @@ def _bootstrap_db():
     _client.connect(user="admin", key=config["admin_pass"])
     exists = _client.get_database(config["dbid"])
     if exists and config["force_reset_on_init"]:
-        _client.delete_database(dbid=config["dbid"], team="admin", force=True)
+        _client.delete_database(dbid=config["dbid"], team="admin", force="true")
     exists = _client.get_database(config["dbid"])
     if not exists:
         print("bootstrapping terminus db")
@@ -105,12 +106,26 @@ def _bootstrap_db():
             commit_msg="Adding schema",
             create=True,
         )
+    elif config.get("reset_schema"):
+        _client.replace_document(
+            config["schema_objects"],
+            graph_type="schema",
+            commit_msg="Resetting schema",
+            create=True,
+        )
 
 
 def _bootstrap_queries():
     client = get_terminus_client()
     client.replace_document(
-        [{"query_literal": q} for q in QUERIES],
+        [
+            {
+                "query_literal": q,
+                "query_literal_md5": hash_of(q, algo="md5"),
+                "@type": "Query",
+            }
+            for q in QUERIES
+        ],
         create=True,
         commit_msg="Ensure queries",
     )

@@ -19,5 +19,12 @@ lint:
 	flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 \
 		--statistics --extend-exclude="./build/" --extend-ignore=F722
 
+schema-inspect:
+	docker-compose exec app \
+		python -c 'import json; from ads_query_eval.config import get_terminus_config; c = get_terminus_config(); print(json.dumps(c["schema_objects"], indent=2))'
+
 up-dev:
 	docker-compose up -d --build --force-recreate
+
+up-dagster-dev:
+	docker-compose up -d --build --force-recreate dagster-dagit dagster-daemon

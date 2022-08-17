@@ -1,4 +1,6 @@
+import json
 import pickle
+from typing import List
 
 from dagster import (
     op,
@@ -18,6 +20,7 @@ from dagster import (
     static_partitioned_config,
     job,
     schedule,
+    Failure,
 )
 from gridfs import GridFS
 
@@ -28,7 +31,7 @@ from ads_query_eval.lib.io import fetch_first_n
 from ads_query_eval.frame import s3
 from ads_query_eval.lib.io import gfs_put_as_gzipped_json, fetch_first_page
 from ads_query_eval.frame.models import Query
-from ads_query_eval.lib.util import hash_of
+from ads_query_eval.lib.util import hash_of, now, today_as_str
 
 bootstrap()
 
@@ -46,64 +49,16 @@ def terminus_resource():
 class S3PickleIOManager(IOManager):
     def handle_output(self, context, obj):
         key = "__".join(context.get_identifier())
-        s3.put(key=key, body=pickle.dumps(obj))
+        s3.put(client=get_s3_client(), key=key, body=pickle.dumps(obj))
 
     def load_input(self, context):
         key = "__".join(context.get_identifier())
-        return pickle.loads(s3.get(key=key).read())
+        return pickle.loads(s3.get(client=get_s3_client(), key=key).read())
 
 
 @io_manager
 def s3_pickle_io_manager():
     return S3PickleIOManager()
-
-
-@op(config_schema={"query": str, "query_id": str}, required_resource_keys={"db"})
-def get_query_responses(context: OpExecutionContext):
-    doc = context.resources.db.queries.find_one({"query": context.op_config["query"]})
-    q = Query(**doc)
-    if q.id != context.op_config["query_id"]:
-        raise ValueError("Mismatch between supplied and retrieved query id")
-
-    context.log.info(f"fetching {q.query}")
-    responses = fetch_first_n(q=q.query, n=1000, logger=context.log)
-    return {"payload": responses, "name": f"query_{q.id:02}_responses"}
-
-
-@op(config_schema={"query": str, "query_id": str})
-def query_responses_to_analysis_dict(context: OpExecutionContext, responses: list):
-    query_analysis = {}
-    query_id = context.op_config["query_id"]
-
-    for r in responses:
-        highlighting = r["highlighting"]
-        q = r["responseHeader"]["params"]["q"]
-        docs = r["response"]["docs"]
-        docs_with_highlighting = []
-        for d in docs:
-            dwh = {k: v for k, v in d.items()}
-            h_for_doc = highlighting.get(d["id"])
-            if h_for_doc:
-                dwh["highlighting"] = h_for_doc
-            docs_with_highlighting.append(dwh)
-        if q not in query_analysis:
-            query_analysis[q] = {"returned": []}
-        query_analysis[q]["returned"].extend(docs_with_highlighting)
-    return {"payload": query_analysis, "name": f"query_analysis"}
-
-
-@op(required_resource_keys={"gfs"})
-def persist_to_gfs(context: OpExecutionContext, named_payload):
-    payload, basename = named_payload["payload"], named_payload["name"]
-    _id = gfs_put_as_gzipped_json(context.resources.gfs, payload, basename)
-    context.log.info(f"results logged as {basename}.json.gz ({_id}) in GridFS")
-    return str(_id)
-
-
-@op(required_resource_keys={"db"})
-def register_query_run_id(context: OpExecutionContext, run_id: str):
-    db = context.resources.db
-    db.queries.update_one()
 
 
 @op(required_resource_keys={"db"})
@@ -137,46 +92,139 @@ def inject_topic_review_analysis(context: OpExecutionContext, query_analysis):
     return {"payload": query_analysis, "name": "query_analysis"}
 
 
-@graph
-def get_and_log_query_results():
-    responses = get_query_responses()
-    persist_to_gfs(responses)
+def encode_partition_key(s):
+    return s.replace("...", "···")
 
-    query_analysis = query_responses_to_analysis_dict(responses)
-    persist_to_gfs(query_analysis)
 
-    query_analysis = inject_topic_review_analysis(query_analysis)
-    persist_to_gfs(query_analysis)
+def decode_partition_key(s):
+    return s.replace("···", "...")
 
 
 @repository
 def default():
     client = get_terminus_client()
     queries = client.get_documents_by_type("Query", as_list=True)
-    query_literals = [q["query_literal"] for q in queries]
+    query_literal_pks = [encode_partition_key(q["query_literal"]) for q in queries]
 
-    @static_partitioned_config(partition_keys=query_literals)
+    @static_partitioned_config(partition_keys=query_literal_pks)
     def retrieval_config(partition_key: str):
-        return {"ops": {"retrieval_op": {"config": {"query_literal": partition_key}}}}
+        return {
+            "ops": {"retrieval_op": {"config": {"query_literal_pk": partition_key}}}
+        }
 
-    @op(config_schema={"query_literal": str}, required_resource_keys={"s3", "terminus"})
-    def retrieval_op(context):
-        q = context.op_config["query_literal"]
-        context.log.info(q)
-        # rv = fetch_first_n(q=q, n=1000, logger=context.log)
+    @op(
+        config_schema={"query_literal_pk": str},
+        required_resource_keys={"s3", "terminus"},
+    )
+    def retrieval_op(context: OpExecutionContext):
+        s3_client, terminus_client = context.resources.s3, context.resources.terminus
+        query_literal_pk = context.op_config["query_literal_pk"]
+        query_literal = decode_partition_key(query_literal_pk)
+
+        context.log.info(f"Will fetch {query_literal}")
+        responses = fetch_first_n(q=query_literal, n=25, logger=context.log)
+        yyyy_mm_dd = today_as_str()
+        key = f"{yyyy_mm_dd}_{query_literal}"
+        s3.put(client=s3_client, key=key, body=json.dumps(responses).encode())
+        q = next(
+            terminus_client.query_document(
+                {"@type": "Query", "query_literal": query_literal}
+            ),
+            None,
+        )
+        if q is None:
+            raise Failure(f"No Query with query_literal {query_literal} found!")
+        [retrieval_id] = terminus_client.insert_document(
+            {
+                "@type": "Retrieval",
+                "query": q["@id"],
+                "s3_key": key,
+                "done": "true",
+                "done_at": now(),
+                "status": "completed",
+            }
+        )
+        context.log.info(f"Put {key} to S3")
+        return {
+            "retrieval": retrieval_id,
+            "query_literal": query_literal,
+            "responses": responses,
+        }
+
+    @op(
+        required_resource_keys={"terminus"},
+    )
+    def format_query_retrieval_for_evaluation(
+        context: OpExecutionContext, retrieval_op_out
+    ):
+        terminus_client = context.resources.terminus
+        query_literal = retrieval_op_out["query_literal"]
+        responses = retrieval_op_out["responses"]
+        [retrieved_items_list_id] = terminus_client.insert_document(
+            {"@type": "RetrievedItemsList", "retrieval": retrieval_op_out["retrieval"]}
+        )
+
+        retrieved_items = []
+
+        for r in responses:
+            highlighting = r["highlighting"]
+            q = r["responseHeader"]["params"]["q"]
+            if q != query_literal:
+                context.log.warning(
+                    f"query param in retrieval ({q}) does not match query_literal {query_literal}"
+                )
+            docs = r["response"]["docs"]
+            docs_with_highlighting = []
+            for d in docs:
+                dwh = {k: v for k, v in d.items()}
+                h_for_doc = highlighting.get(d["id"])
+                if h_for_doc:
+                    dwh["highlighting"] = h_for_doc
+                docs_with_highlighting.append(dwh)
+            retrieved_items.extend(docs_with_highlighting)
+
+        retrievable_item_ids = terminus_client.replace_document(
+            [
+                {"@type": "RetrievableItem", "ads_bibcode": item["bibcode"]}
+                for item in retrieved_items
+            ],
+            create=True,
+        )
+
+        terminus_client.insert_document(
+            [
+                {
+                    "@type": "RetrievedItem",
+                    "retrieved_items_list": retrieved_items_list_id,
+                    "retrievabe_item": retrievable_item_id,
+                    "content": item,
+                }
+                for item, retrievable_item_id in zip(
+                    retrieved_items, retrievable_item_ids
+                )
+            ]
+        )
 
     @job(
         config=retrieval_config,
         resource_defs={"s3": s3_resource, "terminus": terminus_resource},
     )
     def retrieval_job():
-        retrieval_op()
+        format_query_retrieval_for_evaluation(retrieval_op())
 
-    @schedule(cron_schedule="0 0 * * *", job=retrieval_job)
+    @schedule(
+        execution_timezone="America/New_York",
+        cron_schedule="0 0 * * *",
+        job=retrieval_job,
+    )
     def retrieval_schedule():
-        for q in query_literals:
-            request = retrieval_job.run_request_for_partition(
-                partition_key=q, run_key=hash_of(q)
+        yyyy_mm_dd = today_as_str()
+        for q in queries:
+            request = (
+                retrieval_job.run_request_for_partition(
+                    partition_key=encode_partition_key(q["query_literal"]),
+                    run_key=f'{yyyy_mm_dd}_{encode_partition_key(q["query_literal"])}',
+                ),
             )
             yield request
 
