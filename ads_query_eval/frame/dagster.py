@@ -1,37 +1,25 @@
-import json
 import pickle
-from typing import List
 
 from dagster import (
     op,
     repository,
     resource,
-    graph,
     OpExecutionContext,
     io_manager,
     IOManager,
-    SourceAsset,
-    AssetKey,
-    asset,
-    AssetIn,
-    define_asset_job,
-    ScheduleDefinition,
-    with_resources,
     static_partitioned_config,
     job,
     schedule,
     Failure,
 )
-from gridfs import GridFS
 
 from ads_query_eval.app.bootstrap import bootstrap
 from ads_query_eval.config import get_s3_client, get_terminus_client
 from ads_query_eval.lib.io import fetch_first_n
 
 from ads_query_eval.frame import s3
-from ads_query_eval.lib.io import gfs_put_as_gzipped_json, fetch_first_page
-from ads_query_eval.frame.models import Query
-from ads_query_eval.lib.util import hash_of, now, today_as_str
+from ads_query_eval.lib.io import fetch_first_page
+from ads_query_eval.lib.util import now, today_as_str
 
 bootstrap()
 
@@ -125,7 +113,7 @@ def default():
         responses = fetch_first_n(q=query_literal, n=25, logger=context.log)
         yyyy_mm_dd = today_as_str()
         key = f"{yyyy_mm_dd}_{query_literal}"
-        s3.put(client=s3_client, key=key, body=json.dumps(responses).encode())
+        s3.put_json(client=s3_client, key=key, body=responses)
         q = next(
             terminus_client.query_document(
                 {"@type": "Query", "query_literal": query_literal}
@@ -164,7 +152,7 @@ def default():
             {"@type": "RetrievedItemsList", "retrieval": retrieval_op_out["retrieval"]}
         )
 
-        retrieved_items = []
+        formatted_items = []
 
         for r in responses:
             highlighting = r["highlighting"]
@@ -181,12 +169,12 @@ def default():
                 if h_for_doc:
                     dwh["highlighting"] = h_for_doc
                 docs_with_highlighting.append(dwh)
-            retrieved_items.extend(docs_with_highlighting)
+            formatted_items.extend(docs_with_highlighting)
 
         retrievable_item_ids = terminus_client.replace_document(
             [
                 {"@type": "RetrievableItem", "ads_bibcode": item["bibcode"]}
-                for item in retrieved_items
+                for item in formatted_items
             ],
             create=True,
         )
@@ -196,11 +184,11 @@ def default():
                 {
                     "@type": "RetrievedItem",
                     "retrieved_items_list": retrieved_items_list_id,
-                    "retrievabe_item": retrievable_item_id,
+                    "retrievable_item": retrievable_item_id,
                     "content": item,
                 }
                 for item, retrievable_item_id in zip(
-                    retrieved_items, retrievable_item_ids
+                    formatted_items, retrievable_item_ids
                 )
             ]
         )

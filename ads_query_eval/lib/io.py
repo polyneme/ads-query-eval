@@ -1,10 +1,6 @@
-import gzip
-import json
-from typing import Any
 from urllib.parse import urlencode
 
 import requests
-from gridfs import GridFS
 from terminusdb_client import WOQLClient
 
 from ads_query_eval.config import QUERY_BASE_URL, HEADERS
@@ -70,15 +66,3 @@ def fetch_first_n(q, n=1000, logger=None):
             if logger:
                 logger.info(f"q: {q} start: {start}...")
     return responses
-
-
-def gfs_put_as_gzipped_json(gfs: GridFS, payload: Any, basename=""):
-    if not basename:
-        raise ValueError("Need to supply basename")
-    try:
-        payload_str = json.dumps(payload)
-    except TypeError:
-        raise TypeError("payload isn't JSON serializable")
-
-    data = gzip.compress(json.dumps(payload_str).encode("utf-8"))
-    return gfs.put(data, filename=f"{basename}.json.gz")

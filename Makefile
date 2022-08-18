@@ -1,3 +1,5 @@
+include .env
+
 init:
 	pip install --upgrade pip-tools pip setuptools
 	pip install --editable .
@@ -28,3 +30,11 @@ up-dev:
 
 up-dagster-dev:
 	docker-compose up -d --build --force-recreate dagster-dagit dagster-daemon
+
+reset-dev:
+	docker-compose down
+	docker volume rm $(COMPOSE_PROJECT_NAME)_dagster_postgres_data
+	docker volume create --name=$(COMPOSE_PROJECT_NAME)_dagster_postgres_data
+	docker volume rm $(COMPOSE_PROJECT_NAME)_terminus_data
+	docker volume create --name=$(COMPOSE_PROJECT_NAME)_terminus_data
+	docker-compose up -d --build --force-recreate

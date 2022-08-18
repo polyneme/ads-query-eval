@@ -6,7 +6,7 @@
 
 {% block content %}
   <div class="p-4">
-    {% for run in runs %}
+    {% for retrieval in retrievals %}
         {% include 'retrieval_summary.jinja2' %}
     {% else %}
         No runs found.

@@ -19,6 +19,8 @@ services:
     ports:
       - "8000:8000"
     command: ["./wait-for-it.sh" , "terminus:6363" , "--strict" , "--timeout=300" , "--", "uvicorn", "ads_query_eval.app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      SITE_URL: "http://localhost:8000"
     volumes:
       - ./ads_query_eval:/code/ads_query_eval
 

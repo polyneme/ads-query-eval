@@ -1,3 +1,7 @@
-<a href="/queries/{{ query.id }}/runs/{{ run.id }}"><div style="margin-top: 1em; border: solid;">
-    Run {{ run.id }}: {{ run.summary }}
+<a href="/queries/{{ retrieval.query.replace("Query/","") }}/retrievals/{{ retrieval.id.replace("Retrieval/","") }}"><div style="margin-top: 1em; border: solid;">
+    status: {{ retrieval.status }}
+    {%  if retrieval.done %}
+        <br> done at {{ retrieval.done_at }}
+    {%  endif %}
+    <br> retrieval's raw JSON response: <a target="_blank" style="color: blue" href='https://polyneme.nyc3.cdn.digitaloceanspaces.com/ads-query-eval/{{ retrieval.s3_key }}'>{{ retrieval.s3_key }}</a>
 </div></a>

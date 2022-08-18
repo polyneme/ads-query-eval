@@ -1,0 +1,6 @@
+{%  with content=item.retrieved_item_content %}
+<div>
+    <label for="{{ item.retrieved_item }}">{{ content.title }}</label>
+    <input id="{{ item.retrieved_item }}" type="checkbox">
+</div>
+{% endwith %}

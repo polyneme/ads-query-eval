@@ -5,7 +5,7 @@ from email.mime.multipart import MIMEMultipart
 import secrets
 import smtplib
 import ssl
-
+from typing import List
 
 import requests
 from bs4 import BeautifulSoup
@@ -25,8 +25,16 @@ from ads_query_eval.config import (
     get_s3_client,
 )
 from ads_query_eval.frame import s3
+from ads_query_eval.frame.models import (
+    Retrieval,
+    Query,
+    RetrievedItemsList,
+    RetrievedItem,
+    ItemOfEvaluation,
+    Evaluation,
+)
 from ads_query_eval.lib.io import find_one
-from ads_query_eval.lib.util import get_password_hash
+from ads_query_eval.lib.util import get_password_hash, verify_password
 
 security = HTTPBasic()
 app = FastAPI()
@@ -83,7 +91,9 @@ def invite_link(token: str):
 
 
 @app.post("/credentials_request")
-def invite_link(email_address: str = Form(...), invite_link_token: str = Form(...)):
+def credentials_request(
+    email_address: str = Form(...), invite_link_token: str = Form(...)
+):
     client = get_terminus_client()
     invite_link_doc = find_one(
         client, {"@type": "InviteLink", "token": invite_link_token}
@@ -144,6 +154,24 @@ def invite_link(email_address: str = Form(...), invite_link_token: str = Form(..
     )
 
 
+def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
+    terminus_client = get_terminus_client()
+    user = find_one(
+        terminus_client, {"@type": "User", "username": credentials.username}
+    )
+    username = user["username"] if user else secrets.token_hex()
+    hashed_password = user["hashed_password"] if user else secrets.token_hex()
+    correct_username = secrets.compare_digest(credentials.username, username)
+    correct_password = verify_password(credentials.password, hashed_password)
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
+
+
 @app.get("/")
 def all_queries():
     client = get_terminus_client()
@@ -173,42 +201,111 @@ def query_retrievals(query_literal: str):
             status_code=status.HTTP_404_NOT_FOUND, detail="query not found"
         )
     query = query[0]
-    retrievals = list(
-        terminus_client.query_document({"@type": "Retrieval", "query": query["@id"]})
-    )
-    for r in retrievals:
-        b = s3.get(client=s3_client, key=r["s3_key"])
-        payload = json.loads(b.getvalue())
-        print(payload[0]["response"]["docs"][0].keys())
-        r["payload"] = payload
+    retrievals = [
+        Retrieval(**r)
+        for r in terminus_client.query_document(
+            {"@type": "Retrieval", "query": query["@id"]}
+        )
+    ]
     template = jinja_env.get_template("retrievals.jinja2")
     html_content = template.render(
-        summary_of_all_query_runs=(
-            f"This is for a summary of all retrievals of Query {query_literal} "
-            "and their evaluations."
+        summary_of_all_query_retrievals=(
+            f"There are {len(retrievals)} completed retrievals of Query {query_literal}."
         ),
         query={"query_literal": query_literal},
-        runs=sorted(retrievals, key=lambda r: r["done_at"], reverse=True),
+        retrievals=sorted(retrievals, key=lambda r: r.done_at, reverse=True),
     )
     return HTMLResponse(content=html_content, status_code=200)
 
 
-@app.get("/queries/{query_id}/runs/{run_id}")
-def query_run_evals(query_id: int, run_id: int):
-    template = jinja_env.get_template("run.jinja2")
-    evals = []
-    for r in queries[query_id]["runs"]:
-        if r["id"] == run_id:
-            evals = r["evals"]
+@app.get("/queries/{query_id}/retrievals/{retrieval_id}")
+def query_retrieval_evals(query_id: str, retrieval_id: str):
+    terminus_client = get_terminus_client()
+    retrieval = Retrieval(
+        **find_one(
+            terminus_client, {"@type": "Retrieval", "@id": f"Retrieval/{retrieval_id}"}
+        )
+    )
+    query = Query(
+        **find_one(terminus_client, {"@type": "Query", "@id": retrieval.query})
+    )
+    retrieved_items = retrieved_items_for_retrieval(terminus_client, retrieval)
+    ioevals = [
+        find_one(terminus_client, {"@type": "ItemOfEvaluation", "retrieved_item": i.id})
+        for i in retrieved_items
+    ]
+    ioevals = [ItemOfEvaluation(**i) for i in ioevals if i]
+    evals = [
+        find_one(terminus_client, {"@type": "Evaluation", "@id": eval})
+        for eval in {i.evaluation for i in ioevals}
+    ]
+    evals = [Evaluation(**e) for e in evals]
 
+    template = jinja_env.get_template("retrieval.jinja2")
     html_content = template.render(
-        summary_of_all_query_run_evals=(
-            f"This is for a summary of the evaluations thus far for "
-            f"Run {run_id} of Query {query_id}."
+        summary_of_all_query_retrieval_evals=(
+            f"There have been {len(evals)} evaluations thus far for "
+            f"this retrieval of Query {query.query_literal}."
         ),
-        query={"id": query_id},
-        run={"id": run_id},
+        query=query,
+        retrieval=retrieval,
+        retrieved_items=retrieved_items,
         evals=evals,
+    )
+    return HTMLResponse(content=html_content, status_code=200)
+
+
+def retrieved_items_for_retrieval(terminus_client, retrieval):
+    ril = RetrievedItemsList(
+        **find_one(
+            terminus_client, {"@type": "RetrievedItemsList", "retrieval": retrieval.id}
+        )
+    )
+    return [
+        RetrievedItem(**d)
+        for d in terminus_client.query_document(
+            {"@type": "RetrievedItem", "retrieved_items_list": ril.id}
+        )
+    ]
+
+
+@app.get("/queries/{query_id}/retrievals/{retrieval_id}/evaluations/new")
+def new_evaluation(
+    query_id: str, retrieval_id: str, username: str = Depends(get_current_username)
+):
+    terminus_client = get_terminus_client()
+    user = find_one(terminus_client, {"@type": "User", "username": username})
+    retrieval = Retrieval(
+        **find_one(
+            terminus_client, {"@type": "Retrieval", "@id": f"Retrieval/{retrieval_id}"}
+        )
+    )
+    query = Query(
+        **find_one(terminus_client, {"@type": "Query", "@id": retrieval.query})
+    )
+    retrieved_items = retrieved_items_for_retrieval(terminus_client, retrieval)
+    [id_eval] = terminus_client.insert_document(
+        {
+            "@type": "Evaluation",
+            "evaluator": user["@id"],
+            "status": "in progress",
+            "done": False,
+        }
+    )
+    items_for_evaluation = [
+        {
+            "@type": "ItemOfEvaluation",
+            "evaluation": id_eval,
+            "retrieved_item": ri.id,
+            "retrieved_item_content": ri.content,
+        }
+        for ri in retrieved_items
+    ]
+    template = jinja_env.get_template("eval_form.jinja2")
+    html_content = template.render(
+        id_eval=id_eval,
+        query=query,
+        items_for_evaluation=items_for_evaluation,
     )
     return HTMLResponse(content=html_content, status_code=200)
 

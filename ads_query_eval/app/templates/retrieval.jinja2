@@ -6,7 +6,7 @@
 
 {% block content %}
   <div class="p-4">
-    {% include 'eval_form.jinja2' %}
+      <a style="color: blue" href="/queries/{{ query.id.replace("Query/", "") }}/retrievals/{{ retrieval.id.replace("Retrieval/", "") }}/evaluations/new">Start an evaluation</a>
   </div>
     <div class="p-4">
         <p>Evaluations:</p>
