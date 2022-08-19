@@ -10,8 +10,7 @@
     "@documentation": {
       "@comment": "a search query",
       "@properties": {
-        "query_literal": "the literal query string input",
-        "query_literal_md5": "The MD5 hash of the query string input. Useful when a limited-charset key is needed."
+        "query_literal": "the literal query string input"
       }
     },
     "@key": {
@@ -20,8 +19,7 @@
         "query_literal"
       ]
     },
-    "query_literal": "xsd:string",
-    "query_literal_md5": "xsd:string"
+    "query_literal": "xsd:string"
   },
   {
     "@type": "Class",
@@ -66,6 +64,12 @@
         "s3_key": "The S3 Key (not including bucket name and configured prefix) where the retrieval payload is stored"
       }
     },
+    "@key": {
+      "@type": "Lexical",
+      "@fields": [
+        "s3_key"
+      ]
+    },
     "query": "Query",
     "s3_key": "xsd:string"
   },
@@ -78,6 +82,12 @@
         "retrieval": "the query retrieval",
         "mrr": "Mean Reciprical Rank (MRR)"
       }
+    },
+    "@key": {
+      "@type": "Hash",
+      "@fields": [
+        "retrieval"
+      ]
     },
     "retrieval": "Retrieval",
     "mrr": {
@@ -93,11 +103,20 @@
       "@properties": {
         "retrieved_items_list": "the retrieved list this is a part of",
         "retrievable_item": "the upstream item of which this is a retrieved instance",
+        "position": "The position (one-based) of this in the RetrievedItemsList",
         "content": "the retrieved item content as JSON"
       }
     },
+    "@key": {
+      "@type": "Hash",
+      "@fields": [
+        "retrievable_item",
+        "retrieved_items_list"
+      ]
+    },
     "retrieved_items_list": "RetrievedItemsList",
     "retrievable_item": "RetrievableItem",
+    "position": "xsd:positiveInteger",
     "content": "sys:JSON"
   },
   {
@@ -129,6 +148,12 @@
         "uncertainty": "the degree of uncertainty of the evaluator, if indicated",
         "relevance": "how relevant-to-the-query this retrieved item is evaluated to be"
       }
+    },
+    "@key": {
+      "@type": "Hash",
+      "@fields": [
+        "evaluation", "retrieved_item"
+      ]
     },
     "evaluation": "Evaluation",
     "retrieved_item": "RetrievedItem",
@@ -275,7 +300,7 @@
       }
     },
     "@key": {
-      "@type": "Lexical",
+      "@type": "Hash",
       "@fields": [
         "token"
       ]

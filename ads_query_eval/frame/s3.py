@@ -1,6 +1,8 @@
 import json
 from io import BytesIO
-from typing import Dict, Union, Any
+from typing import Dict, Any
+
+from mypy_boto3_s3.client import S3Client, Exceptions
 
 from ads_query_eval.config import get_s3_config
 
@@ -8,7 +10,11 @@ s3_config = get_s3_config()
 
 
 def put(
-    client, key: str, body: bytes, acl: str = "private", metadata: Dict[str, str] = None
+    client: S3Client,
+    key: str,
+    body: bytes,
+    acl: str = "private",
+    metadata: Dict[str, str] = None,
 ):
     metadata = metadata or {}
     client.put_object(
@@ -21,7 +27,7 @@ def put(
 
 
 def put_json(
-    client,
+    client: S3Client,
     key: str,
     body: Any,
     acl: str = "public-read",
@@ -43,11 +49,11 @@ def put_json(
     )
 
 
-def get(client, key: str) -> BytesIO:
+def get(client: S3Client, key: str) -> BytesIO:
     f = BytesIO()
     client.download_fileobj(s3_config["s3_bucket"], s3_config["s3_prefix"] + key, f)
     return f
 
 
-def get_json(client, key: str):
+def get_json(client: S3Client, key: str):
     return json.loads(get(client, key).getvalue())

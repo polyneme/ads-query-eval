@@ -86,5 +86,5 @@ def get_s3_client():
 
 
 @lru_cache
-def get_invite_link_credentials():
-    return os.getenv("INVITE_LINK_USER"), os.getenv("INVITE_LINK_PASS")
+def get_invite_token():
+    return os.getenv("INVITE_TOKEN")

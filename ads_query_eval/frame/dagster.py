@@ -12,10 +12,11 @@ from dagster import (
     schedule,
     Failure,
 )
+from mypy_boto3_s3.client import Exceptions as S3ClientExceptions
 
 from ads_query_eval.app.bootstrap import bootstrap
 from ads_query_eval.config import get_s3_client, get_terminus_client
-from ads_query_eval.lib.io import fetch_first_n
+from ads_query_eval.lib.io import fetch_first_n, find_one
 
 from ads_query_eval.frame import s3
 from ads_query_eval.lib.io import fetch_first_page
@@ -108,12 +109,6 @@ def default():
         s3_client, terminus_client = context.resources.s3, context.resources.terminus
         query_literal_pk = context.op_config["query_literal_pk"]
         query_literal = decode_partition_key(query_literal_pk)
-
-        context.log.info(f"Will fetch {query_literal}")
-        responses = fetch_first_n(q=query_literal, n=25, logger=context.log)
-        yyyy_mm_dd = today_as_str()
-        key = f"{yyyy_mm_dd}_{query_literal}"
-        s3.put_json(client=s3_client, key=key, body=responses)
         q = next(
             terminus_client.query_document(
                 {"@type": "Query", "query_literal": query_literal}
@@ -122,17 +117,41 @@ def default():
         )
         if q is None:
             raise Failure(f"No Query with query_literal {query_literal} found!")
-        [retrieval_id] = terminus_client.insert_document(
-            {
-                "@type": "Retrieval",
-                "query": q["@id"],
-                "s3_key": key,
-                "done": "true",
-                "done_at": now(),
-                "status": "completed",
-            }
-        )
-        context.log.info(f"Put {key} to S3")
+
+        yyyy_mm_dd = today_as_str()
+        key = f"{yyyy_mm_dd}_{query_literal}"
+        retrieval = find_one(terminus_client, {"@type": "Retrieval", "s3_key": key})
+        if retrieval:
+            context.log.info(f"Found retrieval from today for {query_literal}")
+            try:
+                responses = s3.get_json(client=s3_client, key=key)
+                context.log.info(f"Got cached retrieval for {query_literal}")
+            except S3ClientExceptions.NoSuchKey:
+                context.log.info(
+                    f"Retrieval payload not found. Will fetch {query_literal}"
+                )
+                responses = fetch_first_n(q=query_literal, n=25, logger=context.log)
+                s3.put_json(client=s3_client, key=key, body=responses)
+                context.log.info(f"Put {key} to S3")
+            retrieval_id = retrieval["@id"]
+        else:
+            context.log.info(
+                f"No retrieval for today for {query_literal} registered in DB. Fetching..."
+            )
+            responses = fetch_first_n(q=query_literal, n=25, logger=context.log)
+            s3.put_json(client=s3_client, key=key, body=responses)
+            context.log.info(f"Put {key} to S3")
+            [retrieval_id] = terminus_client.insert_document(
+                {
+                    "@type": "Retrieval",
+                    "query": q["@id"],
+                    "s3_key": key,
+                    "done": "true",
+                    "done_at": now(),
+                    "status": "completed",
+                }
+            )
+
         return {
             "retrieval": retrieval_id,
             "query_literal": query_literal,
@@ -148,8 +167,9 @@ def default():
         terminus_client = context.resources.terminus
         query_literal = retrieval_op_out["query_literal"]
         responses = retrieval_op_out["responses"]
-        [retrieved_items_list_id] = terminus_client.insert_document(
-            {"@type": "RetrievedItemsList", "retrieval": retrieval_op_out["retrieval"]}
+        [retrieved_items_list_id] = terminus_client.replace_document(
+            {"@type": "RetrievedItemsList", "retrieval": retrieval_op_out["retrieval"]},
+            create=True,
         )
 
         formatted_items = []
@@ -171,26 +191,28 @@ def default():
                 docs_with_highlighting.append(dwh)
             formatted_items.extend(docs_with_highlighting)
 
-        retrievable_item_ids = terminus_client.replace_document(
-            [
-                {"@type": "RetrievableItem", "ads_bibcode": item["bibcode"]}
-                for item in formatted_items
-            ],
-            create=True,
-        )
+        retrievable_item_docs = [
+            {
+                "@type": "RetrievableItem",
+                "ads_bibcode": item["bibcode"],
+                "@capture": f"id_{item['bibcode']}",
+            }
+            for item in formatted_items
+        ]
+        retrieved_item_docs = [
+            {
+                "@type": "RetrievedItem",
+                "retrieved_items_list": retrieved_items_list_id,
+                "retrievable_item": {"@ref": f"id_{item['bibcode']}"},
+                "content": item,
+                "position": i + 1,
+            }
+            for i, item in enumerate(formatted_items)
+        ]
 
-        terminus_client.insert_document(
-            [
-                {
-                    "@type": "RetrievedItem",
-                    "retrieved_items_list": retrieved_items_list_id,
-                    "retrievable_item": retrievable_item_id,
-                    "content": item,
-                }
-                for item, retrievable_item_id in zip(
-                    formatted_items, retrievable_item_ids
-                )
-            ]
+        terminus_client.replace_document(
+            retrievable_item_docs + retrieved_item_docs,
+            create=True,
         )
 
     @job(

@@ -121,7 +121,6 @@ def _bootstrap_queries():
         [
             {
                 "query_literal": q,
-                "query_literal_md5": hash_of(q, algo="md5"),
                 "@type": "Query",
             }
             for q in QUERIES

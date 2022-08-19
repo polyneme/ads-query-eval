@@ -73,3 +73,9 @@ class Evaluation(Operation):
     evaluator: str
     p_at_25: Optional[float]
     r_at_1000: Optional[float]
+
+
+class User(BaseModel):
+    id: str = Field(..., alias="@id")
+    email_address: str
+    username: str
