@@ -131,7 +131,7 @@ def default():
                     f"Retrieval payload not found. Will fetch {query_literal}"
                 )
                 context.log.info(f"Exception info: {e}")
-                responses = fetch_first_n(q=query_literal, n=100, logger=context.log)
+                responses = fetch_first_n(q=query_literal, n=1000, logger=context.log)
                 s3.put_json(client=s3_client, key=key, body=responses)
                 context.log.info(f"Put {key} to S3")
             retrieval_id = retrieval["@id"]
