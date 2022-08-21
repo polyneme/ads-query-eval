@@ -212,6 +212,17 @@ def query_retrievals(query_literal: str):
             {"@type": "Retrieval", "query": query["@id"]}
         )
     ]
+    n_retrieved = {}
+    for r in retrievals:
+        q = (
+            WQ()
+            .count("v:ri")
+            .woql_and(
+                WQ().triple("v:ril", "retrieval", r.id),
+                WQ().triple("v:ri", "retrieved_items_list", "v:ril"),
+            )
+        )
+        n_retrieved[r.id] = terminus_client.query(q)["bindings"][0]["ri"]["@value"]
     template = jinja_env.get_template("retrievals.jinja2")
     html_content = template.render(
         summary_of_all_query_retrievals=(
@@ -219,6 +230,7 @@ def query_retrievals(query_literal: str):
         ),
         query={"query_literal": query_literal},
         retrievals=sorted(retrievals, key=lambda r: r.done_at, reverse=True),
+        n_retrieved=n_retrieved,
     )
     return HTMLResponse(content=html_content, status_code=200)
 
@@ -276,6 +288,7 @@ def new_evaluation(retrieval_id: str, username: str = Depends(get_current_userna
             "evaluator": user.id,
             "status": "in progress",
             "done": False,
+            "retrieval": retrieval.id,
         }
     )
     id_eval = "/".join(id_eval.split("/")[-2:])
@@ -297,6 +310,10 @@ def new_evaluation(retrieval_id: str, username: str = Depends(get_current_userna
         ]
     ]
     items_for_evaluation = sorted(items_for_evaluation, key=itemgetter("position"))
+
+    # Only first 25 for users
+    items_for_evaluation = items_for_evaluation[:25]
+
     for i in items_for_evaluation:
         i["highlights"] = sorted(
             i["retrieved_item_content"].highlighting.items(),
@@ -336,17 +353,6 @@ async def submit_evaluation(
         }
         for ri_id, inp in item_eval.items()
     ]
-    docs.append(
-        {
-            "@type": "Evaluation",
-            "@id": f"Evaluation/{eval_id}",
-            "done": "true",
-            "status": "completed",
-            "done_at": now(),
-            "evaluator": user.id,
-        }
-    )
-    terminus_client.replace_document(docs, create=True)
     q = (
         WQ()
         .select("r")
@@ -355,8 +361,24 @@ async def submit_evaluation(
             WQ().triple("v:ril", "retrieval", "v:r"),
         )
     )
-    r_uri = "/" + terminus_client.query(q)["bindings"][0]["r"]
-    return RedirectResponse(url=r_uri, status_code=status.HTTP_303_SEE_OTHER)
+    id_retrieval = terminus_client.query(q)["bindings"][0]["r"]
+    docs.append(
+        {
+            "@type": "Evaluation",
+            "@id": f"Evaluation/{eval_id}",
+            "done": "true",
+            "status": "completed",
+            "done_at": now(),
+            "evaluator": user.id,
+            "retrieval": id_retrieval,
+            "believed_query_intent": form_data.get("intent", ""),
+        }
+    )
+    terminus_client.replace_document(docs, create=True)
+
+    return RedirectResponse(
+        url="/" + id_retrieval, status_code=status.HTTP_303_SEE_OTHER
+    )
 
 
 def email_credentials_link(receiver_email: str, one_time_link: str):

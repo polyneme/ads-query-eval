@@ -258,6 +258,11 @@
       }
     },
     "evaluator": "Evaluator",
+    "believed_query_intent": {
+      "@type": "Optional",
+      "@class": "xsd:string"
+    },
+    "retrieval": "Retrieval",
     "r_at_1000": {
       "@type": "Optional",
       "@class": "xsd:decimal"

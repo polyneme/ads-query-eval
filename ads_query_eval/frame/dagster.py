@@ -126,11 +126,12 @@ def default():
             try:
                 responses = s3.get_json(client=s3_client, key=key)
                 context.log.info(f"Got cached retrieval for {query_literal}")
-            except S3ClientExceptions.NoSuchKey:
+            except Exception as e:
                 context.log.info(
                     f"Retrieval payload not found. Will fetch {query_literal}"
                 )
-                responses = fetch_first_n(q=query_literal, n=25, logger=context.log)
+                context.log.info(f"Exception info: {e}")
+                responses = fetch_first_n(q=query_literal, n=100, logger=context.log)
                 s3.put_json(client=s3_client, key=key, body=responses)
                 context.log.info(f"Put {key} to S3")
             retrieval_id = retrieval["@id"]

@@ -1,5 +1,6 @@
 <a href="/{{ retrieval.id }}"><div style="margin-top: 1em; border: solid;">
     status: {{ retrieval.status }}
+    <br># retrieved: {{ n_retrieved.get(retrieval.id) }}
     {%  if retrieval.done %}
         <br> done at {{ retrieval.done_at }}
     {%  endif %}
