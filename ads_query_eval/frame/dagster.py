@@ -121,6 +121,7 @@ def default():
         yyyy_mm_dd = today_as_str()
         key = f"{yyyy_mm_dd}_{query_literal}"
         retrieval = find_one(terminus_client, {"@type": "Retrieval", "s3_key": key})
+        n_to_retrieve = 1000
         if retrieval:
             context.log.info(f"Found retrieval from today for {query_literal}")
             try:
@@ -131,7 +132,9 @@ def default():
                     f"Retrieval payload not found. Will fetch {query_literal}"
                 )
                 context.log.info(f"Exception info: {e}")
-                responses = fetch_first_n(q=query_literal, n=1000, logger=context.log)
+                responses = fetch_first_n(
+                    q=query_literal, n=n_to_retrieve, logger=context.log
+                )
                 s3.put_json(client=s3_client, key=key, body=responses)
                 context.log.info(f"Put {key} to S3")
             retrieval_id = retrieval["@id"]
@@ -139,7 +142,9 @@ def default():
             context.log.info(
                 f"No retrieval for today for {query_literal} registered in DB. Fetching..."
             )
-            responses = fetch_first_n(q=query_literal, n=25, logger=context.log)
+            responses = fetch_first_n(
+                q=query_literal, n=n_to_retrieve, logger=context.log
+            )
             s3.put_json(client=s3_client, key=key, body=responses)
             context.log.info(f"Put {key} to S3")
             [retrieval_id] = terminus_client.insert_document(
@@ -168,6 +173,7 @@ def default():
         terminus_client = context.resources.terminus
         query_literal = retrieval_op_out["query_literal"]
         responses = retrieval_op_out["responses"]
+        context.log.info("upserting RetrievedItemsList")
         [retrieved_items_list_id] = terminus_client.replace_document(
             {"@type": "RetrievedItemsList", "retrieval": retrieval_op_out["retrieval"]},
             create=True,
@@ -175,6 +181,7 @@ def default():
 
         formatted_items = []
 
+        context.log.info("formatting items")
         for r in responses:
             highlighting = r["highlighting"]
             q = r["responseHeader"]["params"]["q"]
@@ -211,6 +218,7 @@ def default():
             for i, item in enumerate(formatted_items)
         ]
 
+        context.log.info("upserting RetrievableItem and RetrievedItem docs")
         terminus_client.replace_document(
             retrievable_item_docs + retrieved_item_docs,
             create=True,
