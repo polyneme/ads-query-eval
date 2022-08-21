@@ -1,6 +1,11 @@
 version: "3.7"
 
 services:
+  app:
+    deploy:
+      mode: replicated
+      replicas: 4    
+
   nginx:
     build: ./nginx
     image: polyneme/nginx
