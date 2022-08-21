@@ -43,6 +43,7 @@ class RetrievedItemContent(BaseModel):
     highlighting: Dict[str, List[str]]
     pubdate: str
     title: str
+    author: List[str]
 
     @validator("title", pre=True, always=True)
     def title_as_str(cls, v):
@@ -55,6 +56,7 @@ class RetrievedItemContent(BaseModel):
 
 class RetrievedItem(BaseModel):
     id: str = Field(..., alias="@id")
+    position: int
     retrieved_items_list: str
     retrievable_item: str
     content: RetrievedItemContent

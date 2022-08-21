@@ -1,1 +1,6 @@
-{{ eval.summary }}
+<div class="mt-5 p-2 border-solid border-2 border-slate-200 rounded-lg">
+    <span class="-pt-2">{{ eval.id }}</span>
+    <br>status: {{ eval.status }}
+    <br>{%  if eval.done %}done at: {{ eval.done_at }}{%  endif %}
+    <br>Evaluated by: {{ eval.evaluator }}
+</div>

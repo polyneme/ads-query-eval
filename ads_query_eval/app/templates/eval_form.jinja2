@@ -1,9 +1,36 @@
-<p>Evaluation for query retrieval <a href="/{{ retrieval.id }}">{{ retrieval.id }}</a></p>
-<form style="border: thin solid; padding: 1em; border-radius: 5px">
-    {% for item in items_for_evaluation %}
-         {% include 'item_to_evaluate.jinja2' %}
+{% extends 'base.jinja2' %}
+
+{% block header %}
+    Evaluation for query retrieval <a class="text-blue-600" href="/{{ retrieval.id }}">{{ retrieval.id }}</a>
+{% endblock %}
+
+{% block content %}
+<form class="p-4" method="post" action="/{{ id_eval }}">
+    <div class="m-1 mb-10">
+        <label for="intent">
+            In a sentence or two, what do you believe is the user's intent for the query
+            <span class="font-mono font-bold bg-slate-200">{{ query.query_literal }}</span>?
+        </label>
+        <br><textarea class="min-w-full" rows="2"
+                  required name="intent" id="intent"></textarea>
+    </div>
+    <div class="flex flex-col space-y-10">
+
+        <h3>Now, please mark each of the {{ items_for_evaluation|length }} retrieved items below as <em class="font-bold">relevant</em> or
+        <em class="font-light">not relevant (default) </em> to the user's intent.</h3>
+
+        {% for item in items_for_evaluation %}
+        {% with %}
+            {% set n_item=loop.index %}
+            {% set content=item.retrieved_item_content %}
+            {% set bibcode=item.retrieved_item_content.bibcode %}
+            {% set n_all_items = items_for_evaluation|length %}
+            {% include 'item_to_evaluate.jinja2' %}
+        {%  endwith %}
     {% endfor %}
+    </div>
     <input type="submit"
            value="Submit Evaluation"
-           style="background-color: aquamarine; border-radius: 5px; border-color:#000; padding: 5px; margin-top: 1em; cursor: pointer">
+           class="bg-cyan-200 border-slate-800 border-2 rounded-lg p-4 mt-5 cursor-pointer">
 </form>
+{% endblock %}

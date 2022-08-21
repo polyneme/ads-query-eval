@@ -1,6 +1,77 @@
-{%  with content=item.retrieved_item_content %}
-<div>
-    <label for="{{ item.retrieved_item }}">{{ content.title }}</label>
-    <input id="{{ item.retrieved_item }}" type="checkbox">
+<div class="border-solid m-1 border-slate-200 border-2 rounded-lg">
+    <span class="text-slate-400 mr-4">{{ n_item }}/{{ n_all_items }}</span>    {{  content.bibcode }}&nbsp;&nbsp;&nbsp;&nbsp;{{ content.pubdate[:7].replace("-","/") }}&nbsp;&nbsp;&nbsp;&nbsp;cited: {{ content.num_citations }}
+    <h3 class="text-blue-800 font-bold py-0">{{ content.title }}</h3>
+    <span>{{ "; ".join(content.author) }}</span>
+    {% for location, instances in item.highlights %}
+        {%  for i in instances %}
+            <br><em>{{ location }}</em>: {{ i.replace("<em>","<em class='bg-blue-200'>") }}
+        {% endfor %}
+    {%  endfor %}
+    <div class="text-blue-800 font-bold">Abstract</div>
+    <p class="overflow-y-auto max-h-20 border-dotted border-black border-2 rounded-lg p-1 my-1 mx-5">
+        {{ content.abstract }}
+    </p>
+    <section class="mt-5 mb-2">
+    <label class="mr-3" for="{{ item.retrieved_item }}/relevance">Relevant?</label>
+    <input id="{{ item.retrieved_item }}/relevance" name="{{ item.retrieved_item }}/relevance"
+           type="checkbox" value="relevant">
+    </section>
+
+    <fieldset>
+    <legend>Uncertainty:</legend>
+
+    <div class="ml-2">
+      <input type="radio" id="{{ item.retrieved_item }}/uncertainty/not supplied" name="{{ item.retrieved_item }}/uncertainty" value="not supplied"
+             checked="checked">
+      <label for="{{ item.retrieved_item }}/uncertainty/not supplied">default</label>
+    </div>
+
+    <div class="ml-2">
+      <input type="radio" id="{{ item.retrieved_item }}/uncertainty/low" name="{{ item.retrieved_item }}/uncertainty" value="low">
+      <label for="{{ item.retrieved_item }}/uncertainty/low">low (<em>definitely</em> relevant)</label>
+    </div>
+
+    <div class="ml-2">
+      <input type="radio" id="{{ item.retrieved_item }}/uncertainty/high" name="{{ item.retrieved_item }}/uncertainty" value="high">
+      <label for="{{ item.retrieved_item }}/uncertainty/high">high (<em>maybe</em> relevant)</label>
+    </div>
+    </fieldset>
+
 </div>
-{% endwith %}
+
+{#      "@properties": {#}
+{#        "evaluation": "the retrieved-items-list evaluation that this item-of-evaluation is part of",#}
+{#        "retrieved_item": "the RetrievedItem this evaluation is for",#}
+{#        "evaluation_status": "the status of this retrieved-item's evaluation",#}
+{#        "uncertainty": "the degree of uncertainty of the evaluator, if indicated",#}
+{#        "relevance": "how relevant-to-the-query this retrieved item is evaluated to be"#}
+{#      }#}
+{#    "evaluation": "Evaluation",#}
+{#    "retrieved_item": "RetrievedItem",#}
+{#    "evaluation_status": {#}
+{#      "@type": "Enum",#}
+{#      "@id": "EvaluationStatus",#}
+{#      "@value": [#}
+{#        "unviewed",#}
+{#        "left undone",#}
+{#        "done"#}
+{#      ]#}
+{#    },#}
+{#    "uncertainty": {#}
+{#      "@type": "Enum",#}
+{#      "@id": "Uncertainty",#}
+{#      "@value": [#}
+{#        "not supplied",#}
+{#        "low",#}
+{#        "high"#}
+{#      ]#}
+{#    },#}
+{#    "relevance": {#}
+{#      "@type": "Enum",#}
+{#      "@id": "Relevance",#}
+{#      "@value": [#}
+{#        "not relevant",#}
+{#        "relevant"#}
+{#      ]#}
+{#    }#}
+{#  },#}

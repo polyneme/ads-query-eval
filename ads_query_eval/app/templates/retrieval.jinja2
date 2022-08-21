@@ -11,7 +11,7 @@
     <div class="p-4">
         <p>Evaluations:</p>
         {% for eval in evals %}
-            <div style="margin: 1em 0; border: solid thin gray">{% include 'eval.jinja2' %}</div>
+            {% include 'eval.jinja2' %}
         {% else %}
             No evalutions submitted.
         {% endfor %}
