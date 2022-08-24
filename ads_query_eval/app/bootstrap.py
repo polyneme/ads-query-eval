@@ -1,5 +1,6 @@
 from pymongo import ReplaceOne
 from terminusdb_client import WOQLClient
+from toolz import pluck
 
 from ads_query_eval.config import get_terminus_client, get_terminus_config
 from ads_query_eval.lib.util import hash_of
@@ -117,31 +118,43 @@ def _bootstrap_db():
 
 def _bootstrap_queries():
     client = get_terminus_client()
-    client.replace_document(
-        [
-            {
-                "query_literal": q,
-                "@type": "Query",
-            }
-            for q in QUERIES
-        ],
-        create=True,
-        commit_msg="Ensure queries",
+    missing = set(QUERIES) - set(
+        pluck("query_literal", client.get_documents_by_type("Query"))
     )
+    if missing:
+        client.insert_document(
+            [
+                {
+                    "query_literal": q,
+                    "@type": "Query",
+                }
+                for q in missing
+            ],
+            commit_msg="Ensure queries",
+        )
 
 
 def _bootstrap_query_topic_reviews_evaluator():
     client = get_terminus_client()
-    client.replace_document(
-        {
-            "@type": "EvaluatingProcedure",
-            "fqn": "ads_query_eval.frame.evaluators.topic_review_references",
-            "version": "0.1",
-            "config": QUERY_TOPIC_REVIEWS,
-        },
-        create=True,
-        commit_msg="Ensure evaluator",
-    )
+    exists = {
+        (d["fqn"], d["version"])
+        for d in client.get_documents_by_type("EvaluatingProcedure")
+    }
+    to_ensure = {("ads_query_eval.frame.evaluators.topic_review_references", "0.1")}
+    missing = to_ensure - exists
+    if missing:
+        client.insert_document(
+            [
+                {
+                    "@type": "EvaluatingProcedure",
+                    "fqn": _fqn,
+                    "version": _version,
+                    "config": QUERY_TOPIC_REVIEWS,
+                }
+                for _fqn, _version in missing
+            ],
+            commit_msg="Ensure evaluator",
+        )
 
 
 def bootstrap():

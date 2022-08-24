@@ -16,20 +16,16 @@ class Operation(BaseModel):
     status: str
 
 
+class RetrievedItem(BaseModel):
+    id: str = Field(..., alias="@id")
+    retrieval: str
+    ads_bibcode: str
+
+
 class Retrieval(Operation):
     query: str
     s3_key: str
-
-
-class RetrievedItemsList(BaseModel):
-    id: str = Field(..., alias="@id")
-    retrieval: str
-    mrr: Optional[float]
-
-
-class RetrievableItem(BaseModel):
-    id: str = Field(..., alias="@id")
-    ads_bibcode: str
+    items: List[str]
 
 
 class RetrievedItemContent(BaseModel):
@@ -54,14 +50,6 @@ class RetrievedItemContent(BaseModel):
         return v or values.get("citations")[field.name]
 
 
-class RetrievedItem(BaseModel):
-    id: str = Field(..., alias="@id")
-    position: int
-    retrieved_items_list: str
-    retrievable_item: str
-    content: RetrievedItemContent
-
-
 class ItemOfEvaluation(BaseModel):
     id: str = Field(..., alias="@id")
     evaluation: str
@@ -72,6 +60,7 @@ class ItemOfEvaluation(BaseModel):
 
 
 class Evaluation(Operation):
+    retrieval: str
     evaluator: str
     p_at_25: Optional[float]
     r_at_1000: Optional[float]

@@ -33,11 +33,11 @@ from ads_query_eval.frame import s3
 from ads_query_eval.frame.models import (
     Retrieval,
     Query,
-    RetrievedItemsList,
     RetrievedItem,
     ItemOfEvaluation,
     Evaluation,
     User,
+    RetrievedItemContent,
 )
 from ads_query_eval.lib.io import find_one
 from ads_query_eval.lib.util import get_password_hash, verify_password, now
@@ -214,15 +214,7 @@ def query_retrievals(query_literal: str):
     ]
     n_retrieved = {}
     for r in retrievals:
-        q = (
-            WQ()
-            .count("v:ri")
-            .woql_and(
-                WQ().triple("v:ril", "retrieval", r.id),
-                WQ().triple("v:ri", "retrieved_items_list", "v:ril"),
-            )
-        )
-        n_retrieved[r.id] = terminus_client.query(q)["bindings"][0]["ri"]["@value"]
+        n_retrieved[r.id] = len(r.items)
     template = jinja_env.get_template("retrievals.jinja2")
     html_content = template.render(
         summary_of_all_query_retrievals=(
@@ -247,14 +239,12 @@ def query_retrieval_evals(retrieval_id: str):
     query = Query(
         **find_one(terminus_client, {"@type": "Query", "@id": retrieval.query})
     )
-    q = WQ().woql_and(
-        WQ().triple("v:ril", "retrieval", retrieval.id),
-        WQ().triple("v:ri", "retrieved_items_list", "v:ril"),
-        WQ().triple("v:ioeval", "retrieved_item", "v:ri"),
-        WQ().triple("v:ioeval", "evaluation", "v:eval"),
-    )
-    ids_eval = {b["eval"] for b in terminus_client.query(q)["bindings"]}
-    evals = [Evaluation(**terminus_client.get_document(id_)) for id_ in ids_eval]
+    evals = [
+        Evaluation(**d)
+        for d in terminus_client.query_document(
+            {"@type": "Evaluation", "retrieval": retrieval.id, "done": "true"}
+        )
+    ]
 
     template = jinja_env.get_template("retrieval.jinja2")
     html_content = template.render(
@@ -271,6 +261,7 @@ def query_retrieval_evals(retrieval_id: str):
 
 @app.get("/Retrieval/{retrieval_id}/Evaluation")
 def new_evaluation(retrieval_id: str, username: str = Depends(get_current_username)):
+    s3_client = get_s3_client()
     terminus_client = get_terminus_client()
     user = User(**find_one(terminus_client, {"@type": "User", "username": username}))
     retrieval = Retrieval(
@@ -285,34 +276,26 @@ def new_evaluation(retrieval_id: str, username: str = Depends(get_current_userna
     [id_eval] = terminus_client.insert_document(
         {
             "@type": "Evaluation",
+            "retrieval": retrieval.id,
             "evaluator": user.id,
             "status": "in progress",
             "done": False,
-            "retrieval": retrieval.id,
         }
     )
-    id_eval = "/".join(id_eval.split("/")[-2:])
-    q = WQ().woql_and(
-        WQ().triple("v:ril", "retrieval", retrieval.id),
-        WQ().triple("v:ri", "retrieved_items_list", "v:ril"),
-        WQ().read_document("v:ri", "v:ri_doc"),
+    items_content = s3.get_json(
+        client=s3_client,
+        key=retrieval.s3_key + "__items_top25",
     )
+    id_eval = "/".join(id_eval.split("/")[-2:])
     items_for_evaluation = [
         {
             "@type": "ItemOfEvaluation",
             "evaluation": id_eval,
-            "position": ri.position,
-            "retrieved_item": ri.id,
-            "retrieved_item_content": ri.content,
+            "retrieved_item": i,
+            "retrieved_item_content": RetrievedItemContent(**c),
         }
-        for ri in [
-            RetrievedItem(**b["ri_doc"]) for b in terminus_client.query(q)["bindings"]
-        ]
+        for i, c in zip(retrieval.items, items_content)
     ]
-    items_for_evaluation = sorted(items_for_evaluation, key=itemgetter("position"))
-
-    # Only first 25 for users
-    items_for_evaluation = items_for_evaluation[:25]
 
     for i in items_for_evaluation:
         i["highlights"] = sorted(
@@ -342,10 +325,15 @@ async def submit_evaluation(
             _, id_, prop = k.split("/")
             item_eval[id_][prop] = v
 
+    eval = Evaluation(
+        **find_one(
+            terminus_client, {"@type": "Evaluation", "@id": f"Evaluation/{eval_id}"}
+        )
+    )
     docs = [
         {
             "@type": "ItemOfEvaluation",
-            "evaluation": f"Evaluation/{eval_id}",
+            "evaluation": eval.id,
             "retrieved_item": f"RetrievedItem/{ri_id}",
             "relevance": inp.get("relevance", "not relevant"),
             "uncertainty": inp.get("uncertainty", "not supplied"),
@@ -353,31 +341,22 @@ async def submit_evaluation(
         }
         for ri_id, inp in item_eval.items()
     ]
-    q = (
-        WQ()
-        .select("r")
-        .woql_and(
-            WQ().triple(docs[0]["retrieved_item"], "retrieved_items_list", "v:ril"),
-            WQ().triple("v:ril", "retrieval", "v:r"),
-        )
-    )
-    id_retrieval = terminus_client.query(q)["bindings"][0]["r"]
     docs.append(
         {
             "@type": "Evaluation",
-            "@id": f"Evaluation/{eval_id}",
+            "@id": eval.id,
             "done": "true",
             "status": "completed",
             "done_at": now(),
             "evaluator": user.id,
-            "retrieval": id_retrieval,
+            "retrieval": eval.retrieval,
             "believed_query_intent": form_data.get("intent", ""),
         }
     )
     terminus_client.replace_document(docs, create=True)
 
     return RedirectResponse(
-        url="/" + id_retrieval, status_code=status.HTTP_303_SEE_OTHER
+        url="/" + eval.retrieval, status_code=status.HTTP_303_SEE_OTHER
     )
 
 
@@ -414,3 +393,11 @@ def email_credentials_link(receiver_email: str, one_time_link: str):
             to_addrs=receiver_email,
             msg=msg.as_string(),
         )
+
+
+@app.get("/{cls}/")
+def get_documents_by_type(cls: str):
+    terminus_client = get_terminus_client()
+    if terminus_client.get_class_frame(cls):
+        return terminus_client.get_documents_by_type(cls, as_list=True, count=10)
+    return None

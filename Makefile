@@ -22,19 +22,19 @@ lint:
 		--statistics --extend-exclude="./build/" --extend-ignore=F722
 
 schema-inspect:
-	docker-compose exec app \
+	docker compose exec app \
 		python -c 'import json; from ads_query_eval.config import get_terminus_config; c = get_terminus_config(); print(json.dumps(c["schema_objects"], indent=2))'
 
 up-dev:
-	docker-compose up -d --build --force-recreate
+	docker compose up -d --build --force-recreate
 
 up-dagster-dev:
-	docker-compose up -d --build --force-recreate dagster-dagit dagster-daemon
+	docker compose up -d --build --force-recreate dagster-dagit dagster-daemon
 
 reset-dev:
-	docker-compose down
+	docker compose down
 	docker volume rm $(COMPOSE_PROJECT_NAME)_dagster_postgres_data
 	docker volume create --name=$(COMPOSE_PROJECT_NAME)_dagster_postgres_data
 	docker volume rm $(COMPOSE_PROJECT_NAME)_terminus_data
 	docker volume create --name=$(COMPOSE_PROJECT_NAME)_terminus_data
-	docker-compose up -d --build --force-recreate
+	docker compose up -d --build --force-recreate

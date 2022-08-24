@@ -27,6 +27,8 @@ services:
   terminus:
     ports:
       - "6364:6363"
+    environment:
+      TERMINUSDB_LOG_LEVEL: DEBUG
 
   dagster-dagit:
     ports:

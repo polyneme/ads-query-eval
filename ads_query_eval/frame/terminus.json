@@ -61,7 +61,8 @@
       "@comment": "a retrieval of a query",
       "@properties": {
         "query": "the query",
-        "s3_key": "The S3 Key (not including bucket name and configured prefix) where the retrieval payload is stored"
+        "s3_key": "The S3 Key (not including bucket name and configured prefix) where the retrieval payload is stored",
+        "items": "ordered list of RetrievedItem values"
       }
     },
     "@key": {
@@ -71,70 +72,27 @@
       ]
     },
     "query": "Query",
-    "s3_key": "xsd:string"
-  },
-  {
-    "@type": "Class",
-    "@id": "RetrievedItemsList",
-    "@documentation": {
-      "@comment": "list of items retrieved from a query retrieval",
-      "@properties": {
-        "retrieval": "the query retrieval",
-        "mrr": "Mean Reciprical Rank (MRR)"
-      }
-    },
-    "@key": {
-      "@type": "Hash",
-      "@fields": [
-        "retrieval"
-      ]
-    },
-    "retrieval": "Retrieval",
-    "mrr": {
-      "@type": "Optional",
-      "@class": "xsd:decimal"
-    }
+    "s3_key": "xsd:string",
+    "items": {"@type":  "List", "@class": "RetrievedItem"}
   },
   {
     "@type": "Class",
     "@id": "RetrievedItem",
     "@documentation": {
-      "@comment": "instance of a retrievable item; part of a RetrievedItemsList",
+      "@comment": "instance of a retrievable item",
       "@properties": {
-        "retrieved_items_list": "the retrieved list this is a part of",
-        "retrievable_item": "the upstream item of which this is a retrieved instance",
-        "position": "The position (one-based) of this in the RetrievedItemsList",
-        "content": "the retrieved item content as JSON"
+        "ads_bibcode": "the item's unique ADS bibcode",
+        "retrieval": "the retrieval this was yielded for"
       }
     },
     "@key": {
       "@type": "Hash",
       "@fields": [
-        "retrievable_item",
-        "retrieved_items_list"
+        "ads_bibcode", "retrieval"
       ]
     },
-    "retrieved_items_list": "RetrievedItemsList",
-    "retrievable_item": "RetrievableItem",
-    "position": "xsd:positiveInteger",
-    "content": "sys:JSON"
-  },
-  {
-    "@type": "Class",
-    "@id": "RetrievableItem",
-    "@documentation": {
-      "@comment": "an indexed item that is retrievable from a search query",
-      "@properties": {
-        "ads_bibcode": "the item's unique ADS bibcode"
-      }
-    },
-    "@key": {
-      "@type": "Lexical",
-      "@fields": [
-        "ads_bibcode"
-      ]
-    },
-    "ads_bibcode": "xsd:string"
+    "ads_bibcode": "xsd:string",
+    "retrieval": "Retrieval"
   },
   {
     "@type": "Class",
@@ -252,17 +210,18 @@
     "@documentation": {
       "@comment": "an automated evaluator",
       "@properties": {
+        "retrieval": "the Retrieval being evaluated",
         "evaluator": "the Evaluator performing / that performed this evaluation",
         "r_at_1000": "Recall R@1000",
         "p_at_25": "Precision P@25"
       }
     },
+    "retrieval": "Retrieval",
     "evaluator": "Evaluator",
     "believed_query_intent": {
       "@type": "Optional",
       "@class": "xsd:string"
     },
-    "retrieval": "Retrieval",
     "r_at_1000": {
       "@type": "Optional",
       "@class": "xsd:decimal"

@@ -11,11 +11,14 @@ from dagster import (
     job,
     schedule,
     Failure,
+    graph,
 )
 from mypy_boto3_s3.client import Exceptions as S3ClientExceptions
+from toolz import assoc
 
 from ads_query_eval.app.bootstrap import bootstrap
 from ads_query_eval.config import get_s3_client, get_terminus_client
+from ads_query_eval.frame.models import Retrieval
 from ads_query_eval.lib.io import fetch_first_n, find_one
 
 from ads_query_eval.frame import s3
@@ -81,34 +84,42 @@ def inject_topic_review_analysis(context: OpExecutionContext, query_analysis):
     return {"payload": query_analysis, "name": "query_analysis"}
 
 
-def encode_partition_key(s):
-    return s.replace("...", "···")
+def query_literal_to_dagster_name(s):
+    return (
+        s.replace(":", "___colon___")
+        .replace('"', "___quote___")
+        .replace(" ", "___space___")
+        .replace("(", "___openparen___")
+        .replace(")", "___closeparen___")
+        .replace(".", "___period___")
+        .replace(",", "___comma___")
+    )
 
 
-def decode_partition_key(s):
-    return s.replace("···", "...")
+def dagster_name_to_query_literal(s):
+    return (
+        s.replace("___colon___", ":")
+        .replace("___quote___", '"')
+        .replace("___space___", " ")
+        .replace("___openparen___", "(")
+        .replace("___closeparen___", ")")
+        .replace("___period___", ".")
+        .replace(",", "___comma___")
+    )
 
 
 @repository
 def default():
     client = get_terminus_client()
     queries = client.get_documents_by_type("Query", as_list=True)
-    query_literal_pks = [encode_partition_key(q["query_literal"]) for q in queries]
-
-    @static_partitioned_config(partition_keys=query_literal_pks)
-    def retrieval_config(partition_key: str):
-        return {
-            "ops": {"retrieval_op": {"config": {"query_literal_pk": partition_key}}}
-        }
 
     @op(
-        config_schema={"query_literal_pk": str},
+        config_schema={"query_literal": str},
         required_resource_keys={"s3", "terminus"},
     )
     def retrieval_op(context: OpExecutionContext):
         s3_client, terminus_client = context.resources.s3, context.resources.terminus
-        query_literal_pk = context.op_config["query_literal_pk"]
-        query_literal = decode_partition_key(query_literal_pk)
+        query_literal = context.op_config["query_literal"]
         q = next(
             terminus_client.query_document(
                 {"@type": "Query", "query_literal": query_literal}
@@ -155,6 +166,7 @@ def default():
                     "done": "true",
                     "done_at": now(),
                     "status": "completed",
+                    "items": [],
                 }
             )
 
@@ -165,22 +177,15 @@ def default():
         }
 
     @op(
-        required_resource_keys={"terminus"},
+        required_resource_keys={"terminus", "s3"},
     )
     def format_query_retrieval_for_evaluation(
         context: OpExecutionContext, retrieval_op_out
     ):
-        terminus_client = context.resources.terminus
+        s3_client, terminus_client = context.resources.s3, context.resources.terminus
         query_literal = retrieval_op_out["query_literal"]
         responses = retrieval_op_out["responses"]
-        context.log.info("upserting RetrievedItemsList")
-        [retrieved_items_list_id] = terminus_client.replace_document(
-            {"@type": "RetrievedItemsList", "retrieval": retrieval_op_out["retrieval"]},
-            create=True,
-        )
-
         formatted_items = []
-
         context.log.info("formatting items")
         for r in responses:
             highlighting = r["highlighting"]
@@ -199,52 +204,53 @@ def default():
                 docs_with_highlighting.append(dwh)
             formatted_items.extend(docs_with_highlighting)
 
-        retrievable_item_docs = [
-            {
-                "@type": "RetrievableItem",
-                "ads_bibcode": item["bibcode"],
-                "@capture": f"id_{item['bibcode']}",
-            }
-            for item in formatted_items
-        ]
-        retrieved_item_docs = [
-            {
-                "@type": "RetrievedItem",
-                "retrieved_items_list": retrieved_items_list_id,
-                "retrievable_item": {"@ref": f"id_{item['bibcode']}"},
-                "content": item,
-                "position": i + 1,
-            }
-            for i, item in enumerate(formatted_items)
-        ]
-
-        context.log.info("upserting RetrievableItem and RetrievedItem docs")
+        _retrieval_doc = find_one(
+            terminus_client,
+            {"@type": "Retrieval", "@id": retrieval_op_out["retrieval"]},
+        )
+        context.log.info("updating retrieval with items")
         terminus_client.replace_document(
-            retrievable_item_docs + retrieved_item_docs,
-            create=True,
+            assoc(
+                _retrieval_doc,
+                "items",
+                [
+                    {
+                        "@type": "RetrievedItem",
+                        "ads_bibcode": item["bibcode"],
+                        "retrieval": retrieval_op_out["retrieval"],
+                    }
+                    for item in formatted_items
+                ],
+            ),
+            commit_msg="updating retrieval with items",
+        )
+        _retrieval = Retrieval(**_retrieval_doc)
+        s3.put_json(
+            client=s3_client,
+            key=_retrieval.s3_key + "__items_all",
+            body=formatted_items,
+        )
+        s3.put_json(
+            client=s3_client,
+            key=_retrieval.s3_key + "__items_top25",
+            body=formatted_items[:25],
         )
 
-    @job(
-        config=retrieval_config,
-        resource_defs={"s3": s3_resource, "terminus": terminus_resource},
-    )
-    def retrieval_job():
+    @graph()
+    def retrieval():
         format_query_retrieval_for_evaluation(retrieval_op())
 
-    @schedule(
-        execution_timezone="America/New_York",
-        cron_schedule="0 0 * * *",
-        job=retrieval_job,
-    )
-    def retrieval_schedule():
-        yyyy_mm_dd = today_as_str()
-        for q in queries:
-            request = (
-                retrieval_job.run_request_for_partition(
-                    partition_key=encode_partition_key(q["query_literal"]),
-                    run_key=f'{yyyy_mm_dd}_{encode_partition_key(q["query_literal"])}',
-                ),
-            )
-            yield request
+    jobs = [
+        retrieval.to_job(
+            name="retrieval__" + query_literal_to_dagster_name(q["query_literal"]),
+            resource_defs={"s3": s3_resource, "terminus": terminus_resource},
+            config={
+                "ops": {
+                    "retrieval_op": {"config": {"query_literal": q["query_literal"]}}
+                }
+            },
+        )
+        for q in queries
+    ]
 
-    return [retrieval_schedule]
+    return [jobs]
