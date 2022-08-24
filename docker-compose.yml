@@ -14,7 +14,7 @@ services:
       - terminus
 
   terminus:
-    image: terminusdb/terminusdb-server:v10.1.2
+    image: terminusdb/terminusdb-server:v10.1.4
     tty: true
     volumes:
       - terminus_data:/app/terminusdb/storage
