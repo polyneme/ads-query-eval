@@ -399,5 +399,5 @@ def email_credentials_link(receiver_email: str, one_time_link: str):
 def get_documents_by_type(cls: str):
     terminus_client = get_terminus_client()
     if terminus_client.get_class_frame(cls):
-        return terminus_client.get_documents_by_type(cls, as_list=True, count=10)
+        return terminus_client.get_documents_by_type(cls, as_list=True, count=25)
     return None
