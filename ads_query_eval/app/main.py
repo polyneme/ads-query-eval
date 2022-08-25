@@ -230,12 +230,21 @@ def query_retrievals(query_literal: str):
 @app.get("/Retrieval/{retrieval_id}")
 def query_retrieval_evals(retrieval_id: str):
     terminus_client = get_terminus_client()
-    retrieval = Retrieval(
-        **find_one(
-            terminus_client,
-            {"@type": "Retrieval", "@id": f"Retrieval/{quote(retrieval_id)}"},
-        )
+    rdoc = find_one(
+        terminus_client,
+        {"@type": "Retrieval", "@id": f"Retrieval/{quote(retrieval_id)}"},
     )
+    if rdoc is None:
+        rdoc = find_one(
+            terminus_client,
+            {"@type": "Retrieval", "@id": f"Retrieval/{retrieval_id}"},
+        )
+    if rdoc is None:
+        return HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"retrieval with ID Retrieval/{retrieval_id} -- or Retrieval/{quote(retrieval_id)} -- not found",
+        )
+    retrieval = Retrieval(**rdoc)
     query = Query(
         **find_one(terminus_client, {"@type": "Query", "@id": retrieval.query})
     )
