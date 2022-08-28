@@ -232,20 +232,12 @@ def query_retrieval_evals(retrieval_id: str):
     terminus_client = get_terminus_client()
     rdoc = find_one(
         terminus_client,
-        {"@type": "Retrieval", "@id": f"Retrieval/{quote(retrieval_id)}"},
+        {"@type": "Retrieval", "s3_key": retrieval_id},
     )
-    if rdoc is None:
-        rdoc = find_one(
-            terminus_client,
-            {
-                "@type": "Retrieval",
-                "@id": f"Retrieval/{retrieval_id.replace(':', '%3A')}",
-            },
-        )
     if rdoc is None:
         return HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"retrieval with ID Retrieval/{retrieval_id} -- or Retrieval/{quote(retrieval_id)} -- not found",
+            detail=f"retrieval with ID Retrieval/{retrieval_id} not found",
         )
     retrieval = Retrieval(**rdoc)
     query = Query(
