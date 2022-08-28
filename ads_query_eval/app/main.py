@@ -237,7 +237,10 @@ def query_retrieval_evals(retrieval_id: str):
     if rdoc is None:
         rdoc = find_one(
             terminus_client,
-            {"@type": "Retrieval", "@id": f"Retrieval/{retrieval_id}"},
+            {
+                "@type": "Retrieval",
+                "@id": f"Retrieval/{retrieval_id.replace(':', '%3A')}",
+            },
         )
     if rdoc is None:
         return HTTPException(
