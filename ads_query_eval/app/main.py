@@ -400,14 +400,6 @@ def email_credentials_link(receiver_email: str, one_time_link: str):
         )
 
 
-@app.get("/{cls}/")
-def get_documents_by_type(cls: str):
-    terminus_client = get_terminus_client()
-    if terminus_client.get_class_frame(cls):
-        return terminus_client.get_documents_by_type(cls, as_list=True, count=25)
-    return None
-
-
 @app.get("/user_completed_evals/")
 def get_user_completed_evals(username: str = Depends(get_current_username)):
     terminus_client = get_terminus_client()
@@ -415,8 +407,8 @@ def get_user_completed_evals(username: str = Depends(get_current_username)):
     if user.email_address not in get_admins():
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admins only")
 
-    return JSONResponse(
-        content=WQ()
+    return (
+        WQ()
         .woql_and(
             WQ().triple("v:eval", "type", "@schema:Evaluation"),
             WQ().read_document("v:eval", "v:eval_doc"),
@@ -434,6 +426,13 @@ def get_user_completed_evals(username: str = Depends(get_current_username)):
             ),
             WQ().read_document("v:itemofeval", "v:itemofeval_doc"),
         )
-        .execute(terminus_client),
-        status_code=200,
+        .execute(terminus_client)
     )
+
+
+@app.get("/{cls}/")  # XXX This route must be last!
+def get_documents_by_type(cls: str):
+    terminus_client = get_terminus_client()
+    if terminus_client.get_class_frame(cls):
+        return terminus_client.get_documents_by_type(cls, as_list=True, count=25)
+    return None
