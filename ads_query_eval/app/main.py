@@ -400,7 +400,7 @@ def email_credentials_link(receiver_email: str, one_time_link: str):
         )
 
 
-@app.get("/user_completed_evals/")
+@app.get("/user_completed_evals/all")
 def get_user_completed_evals(username: str = Depends(get_current_username)):
     terminus_client = get_terminus_client()
     user = User(**find_one(terminus_client, {"@type": "User", "username": username}))
@@ -427,7 +427,28 @@ def get_user_completed_evals(username: str = Depends(get_current_username)):
             WQ().read_document("v:itemofeval", "v:itemofeval_doc"),
         )
         .execute(terminus_client)
-    )
+    )["bindings"]
+
+
+@app.get("/user_completed_evals/summary")
+def get_user_completed_evals(username: str = Depends(get_current_username)):
+    terminus_client = get_terminus_client()
+    user = User(**find_one(terminus_client, {"@type": "User", "username": username}))
+    if user.email_address not in get_admins():
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admins only")
+
+    return (
+        WQ()
+        .woql_and(
+            WQ().triple("v:eval", "type", "@schema:Evaluation"),
+            WQ().read_document("v:eval", "v:eval_doc"),
+            WQ().triple("v:eval", "done", True),
+            WQ().triple("v:eval", "evaluator", "v:evaluator"),
+            WQ().triple("v:evaluator", "type", "@schema:User"),
+            WQ().triple("v:evaluator", "email_address", "v:evaluator_email"),
+        )
+        .execute(terminus_client)
+    )["bindings"]
 
 
 @app.get("/{cls}/")  # XXX This route must be last!
