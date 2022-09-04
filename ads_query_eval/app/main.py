@@ -17,7 +17,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from jinja2 import Environment, PackageLoader, select_autoescape
 from starlette import status
 from starlette.datastructures import FormData
-from starlette.responses import HTMLResponse, RedirectResponse
+from starlette.responses import HTMLResponse, RedirectResponse, JSONResponse
 from terminusdb_client import WOQLQuery as WQ
 from toolz import assoc, groupby
 
@@ -415,8 +415,8 @@ def get_user_completed_evals(username: str = Depends(get_current_username)):
     if user.email_address not in get_admins():
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admins only")
 
-    return (
-        WQ()
+    return JSONResponse(
+        content=WQ()
         .woql_and(
             WQ().triple("v:eval", "type", "@schema:Evaluation"),
             WQ().read_document("v:eval", "v:eval_doc"),
@@ -434,5 +434,6 @@ def get_user_completed_evals(username: str = Depends(get_current_username)):
             ),
             WQ().read_document("v:itemofeval", "v:itemofeval_doc"),
         )
-        .execute(terminus_client)
+        .execute(terminus_client),
+        status_code=200,
     )
