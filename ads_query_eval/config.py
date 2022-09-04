@@ -88,3 +88,8 @@ def get_s3_client():
 @lru_cache
 def get_invite_token():
     return os.getenv("INVITE_TOKEN")
+
+
+@lru_cache
+def get_admins():
+    return set(os.getenv("ADMINS", "").split())

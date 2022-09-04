@@ -1,4 +1,5 @@
 import pickle
+from zoneinfo import ZoneInfo
 
 from dagster import (
     op,
@@ -86,25 +87,13 @@ def inject_topic_review_analysis(context: OpExecutionContext, query_analysis):
 
 def query_literal_to_dagster_name(s):
     return (
-        s.replace(":", "___colon___")
-        .replace('"', "___quote___")
-        .replace(" ", "___space___")
-        .replace("(", "___openparen___")
-        .replace(")", "___closeparen___")
-        .replace(".", "___period___")
-        .replace(",", "___comma___")
-    )
-
-
-def dagster_name_to_query_literal(s):
-    return (
-        s.replace("___colon___", ":")
-        .replace("___quote___", '"')
-        .replace("___space___", " ")
-        .replace("___openparen___", "(")
-        .replace("___closeparen___", ")")
-        .replace("___period___", ".")
-        .replace(",", "___comma___")
+        s.replace(":", "_")
+        .replace('"', "_")
+        .replace(" ", "_")
+        .replace("(", "_")
+        .replace(")", "_")
+        .replace(".", "_")
+        .replace(",", "_")
     )
 
 
@@ -129,7 +118,7 @@ def default():
         if q is None:
             raise Failure(f"No Query with query_literal {query_literal} found!")
 
-        yyyy_mm_dd = today_as_str()
+        yyyy_mm_dd = today_as_str(tz=ZoneInfo("America/New_York"))
         key = f"{yyyy_mm_dd}_{query_literal}"
         retrieval = find_one(terminus_client, {"@type": "Retrieval", "s3_key": key})
         n_to_retrieve = 1000

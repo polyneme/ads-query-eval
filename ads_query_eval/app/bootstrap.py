@@ -94,10 +94,10 @@ def _bootstrap_db():
     config = get_terminus_config()
     _client = WOQLClient(server_url=config["server_url"])
     _client.connect(user="admin", key=config["admin_pass"])
-    exists = _client.get_database(config["dbid"])
+    exists = _client.has_database(config["dbid"])
     if exists and config["force_reset_on_init"]:
         _client.delete_database(dbid=config["dbid"], team="admin", force="true")
-    exists = _client.get_database(config["dbid"])
+    exists = _client.has_database(config["dbid"])
     if not exists:
         print("bootstrapping terminus db")
         _client.create_database(config["dbid"], team="admin")
@@ -161,3 +161,4 @@ def bootstrap():
     _bootstrap_db()
     _bootstrap_queries()
     _bootstrap_query_topic_reviews_evaluator()
+    print("done bootstrapping")

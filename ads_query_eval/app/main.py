@@ -28,6 +28,7 @@ from ads_query_eval.config import (
     get_smtp_config,
     get_s3_client,
     get_invite_token,
+    get_admins,
 )
 from ads_query_eval.frame import s3
 from ads_query_eval.frame.models import (
@@ -405,3 +406,33 @@ def get_documents_by_type(cls: str):
     if terminus_client.get_class_frame(cls):
         return terminus_client.get_documents_by_type(cls, as_list=True, count=25)
     return None
+
+
+@app.get("/user_completed_evals/")
+def get_user_completed_evals(username: str = Depends(get_current_username)):
+    terminus_client = get_terminus_client()
+    user = User(**find_one(terminus_client, {"@type": "User", "username": username}))
+    if user.email_address not in get_admins():
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admins only")
+
+    return (
+        WQ()
+        .woql_and(
+            WQ().triple("v:eval", "type", "@schema:Evaluation"),
+            WQ().read_document("v:eval", "v:eval_doc"),
+            WQ().triple("v:eval", "done", True),
+            WQ().triple("v:eval", "evaluator", "v:evaluator"),
+            WQ().triple("v:evaluator", "type", "@schema:User"),
+            WQ().triple("v:evaluator", "email_address", "v:evaluator_email"),
+            WQ().triple("v:eval", "retrieval", "v:retrieval"),
+            WQ().triple("v:retrieval", "query", "v:query"),
+            WQ().triple("v:query", "query_literal", "v:query_literal"),
+            WQ().triple("v:itemofeval", "evaluation", "v:eval"),
+            WQ().triple("v:itemofeval", "retrieved_item", "v:retrieveditem"),
+            WQ().triple(
+                "v:retrieveditem", "ads_bibcode", "v:retrieveditem_ads_bibcode"
+            ),
+            WQ().read_document("v:itemofeval", "v:itemofeval_doc"),
+        )
+        .execute(terminus_client)
+    )

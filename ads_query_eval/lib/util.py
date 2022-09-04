@@ -8,13 +8,13 @@ from toolz import keyfilter
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def now(as_str=False):
-    dt = datetime.now(timezone.utc)
+def now(as_str=False, tz=timezone.utc):
+    dt = datetime.now(tz=tz)
     return dt.isoformat() if as_str else dt
 
 
-def today_as_str() -> str:
-    return now(as_str=True).split("T", maxsplit=1)[0]
+def today_as_str(tz=timezone.utc) -> str:
+    return now(as_str=True, tz=tz).split("T", maxsplit=1)[0]
 
 
 def import_via_dotted_path(dotted_path: str):
