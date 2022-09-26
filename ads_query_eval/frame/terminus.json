@@ -30,6 +30,7 @@
       "@properties": {
         "done": "is the operation no longer in progress?",
         "status": "status of operation",
+        "status_reason": "reason for status",
         "done_at": "when the operation was considered done, if applicable"
       }
     },
@@ -47,8 +48,14 @@
         "in progress",
         "completed",
         "failed",
-        "aborted"
+        "aborted",
+        "published",
+        "unpublished"
       ]
+    },
+    "status_reason": {
+      "@type": "Optional",
+      "@class": "xsd:string"
     }
   },
   {
