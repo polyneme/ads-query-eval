@@ -4,7 +4,7 @@ boto3-stubs-lite[essential]
 dagit>=1.0
 dagster>=1.0
 dagster_postgres
-fastapi>=0.75.0,<0.76.0 # until using starlette >=0.20.3
+fastapi>=0.85.0
 ipywidgets
 jinja2
 openpyxl

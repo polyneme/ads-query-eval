@@ -6,10 +6,52 @@
 @prefix uat: <http://astrothesaurus.org/uat/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-uat:1
+<http://astrothesaurus.org/uat/0>
+	a skos:Concept ;
+	dcterms:contributor <http://editor.vocabs.ands.org.au/user/AAS_Frey.Katie_Admin> ;
+	dcterms:created "2017-01-23T19:10:45+00:00"^^xsd:dateTime ;
+	dcterms:creator <http://editor.vocabs.ands.org.au/user/AAS_Frey.Katie> ;
+	dcterms:modified
+		"2020-11-04T21:14:42.896000+00:00"^^xsd:dateTime ,
+		"2020-11-04T21:15:00.380000+00:00"^^xsd:dateTime
+		;
+	skos:altLabel
+		"DC white dwarf"@en ,
+		"DC white dwarf stars"@en
+		;
+	skos:broader <http://astrothesaurus.org/uat/1799> ;
+	skos:definition "A white dwarf showing a continuous spectrum with no readily apparent lines."@en ;
+	skos:editorialNote [
+		rdfs:comment "An Etymological Dictionary of Astronomy and Astrophysics, by M. Heydari-Malayeri" ;
+		dcterms:created "2020-11-04T21:14:42.863000+00:00"^^xsd:dateTime ;
+		dcterms:creator <http://editor.vocabs.ands.org.au/user/AAS_Frey.Katie_Admin> ;
+		dcterms:title "Definition Provenance" ;
+	] ;
+	skos:prefLabel "DC stars"@en ;
+	.
+
+<http://astrothesaurus.org/uat/1>
+	a skos:ConceptScheme ;
+	dcterms:contributor
+		<http://editor.vocabs.ands.org.au/user/American-Institute-of-Physics> ,
+		<http://editor.vocabs.ands.org.au/user/Bob-Shobbrook> ,
+		<http://editor.vocabs.ands.org.au/user/Helen-Knudsen> ,
+		<http://editor.vocabs.ands.org.au/user/Institute-of-Physics> ,
+		<http://editor.vocabs.ands.org.au/user/International-Astronomical-Union> ,
+		<http://editor.vocabs.ands.org.au/user/International-Virtual-Observatory-Alliance> ,
+		<http://editor.vocabs.ands.org.au/user/Liz-Bryson> ,
+		<http://editor.vocabs.ands.org.au/user/Marlene-Cummins> ,
+		<http://editor.vocabs.ands.org.au/user/Rick-Hessman> ,
+		<http://editor.vocabs.ands.org.au/user/Robyn-Shobbrook>
+		;
+	dcterms:description "The Unified Astronomy Thesaurus (UAT) is an open, interoperable and community-supported thesaurus which unifies existing, divergent, and isolated controlled vocabularies in astronomy and astrophysics into a single high-quality, freely-available open thesaurus formalizing astronomical concepts and their inter-relationships. The UAT builds upon the IAU Thesaurus with major contributions from the Astronomy portions of the thesauri developed by the Institute of Physics Publishing and the American Institute of Physics. The Unified Astronomy Thesaurus will be further enhanced and updated through a collaborative effort involving broad community participation."@en ;
+	dcterms:modified "2016-09-06T03:28:18+00:00"^^xsd:dateTime ;
+	dcterms:publisher <http://editor.vocabs.ands.org.au/user/American-Astronomical-Society> ;
+	dcterms:subject "Astronomy"@en ;
+	dcterms:title "The Unified Astronomy Thesaurus"@en ;
 	skos:hasTopConcept
-		uat:1476 ,
-		uat:1529
+		<http://astrothesaurus.org/uat/1476> ,
+		<http://astrothesaurus.org/uat/1529>
 		;
 	.
 
