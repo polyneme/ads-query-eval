@@ -94,23 +94,23 @@ black==22.10.0 \
     --hash=sha256:f513588da599943e0cde4e32cc9879e825d58720d6557062d1098c5ad80080e1 \
     --hash=sha256:fba8a281e570adafb79f7755ac8721b6cf1bbf691186a287e990c7929c7692ff
     # via shed
-boto3==1.26.8 \
-    --hash=sha256:b39303fdda9b5d77a152e3ec9f264ae318ccdaa853eaf694626dc335464ded98 \
-    --hash=sha256:c02fc93a926944b4b426a170d2dae274b4c8c09ec5259450b94269a8ce990dd7
+boto3==1.26.9 \
+    --hash=sha256:15b059251990706c5d5a556c42a6e6e781a51edadf48a42afdd06bd313adfaf2 \
+    --hash=sha256:27efa5eb229364bc4643d9e182de0891f73c21b65ef80b5bd02a977caeaf595c
     # via -r requirements/main.in
-boto3-stubs-lite[essential]==1.26.8 \
-    --hash=sha256:3df0181dcee8450a897d14208248319b15daa7861222a24caa71cc2ae64990d1 \
-    --hash=sha256:7e1f3e63bb6045d33d548c6f17478ac077c8dd0dd2f85771572130cb1a6c57fd
+boto3-stubs-lite[essential]==1.26.9 \
+    --hash=sha256:611a6a7d382b9fbec32c3bc9eb333640002b141934e9b7dbff260815aac1ddba \
+    --hash=sha256:aa8557c60aef7d5f420568a7dc7fc6fe7ed7a22fc238de9616979ad2b49f4238
     # via -r requirements/main.in
-botocore==1.29.8 \
-    --hash=sha256:48cf33d7c513320711321c3b303b0c9810b23e15fa03424f7323883e4ce6cef8 \
-    --hash=sha256:9c6adcf4e080be63b92f50d01e176ef2d1d2a3da7d8387a964abb9eb65fc8aad
+botocore==1.29.9 \
+    --hash=sha256:01f168e2418419a6d8b335ecc4330faa6a7332d5a097029fc9b4a3ae3c41cea2 \
+    --hash=sha256:c876a7c6a07d7f86f46a8cc765f0d38999b84ac1d7b0666d6ce08c0503e13145
     # via
     #   boto3
     #   s3transfer
-botocore-stubs==1.29.8 \
-    --hash=sha256:66e49ee1a524d954ce2b199fdc1c052d51379480934c197a34e441a6b2e8c717 \
-    --hash=sha256:d2864cae5f8e574aa5174af28a301120dec66f12d9a0943116d65caad56ba6d1
+botocore-stubs==1.29.9 \
+    --hash=sha256:6a410abfb16d1aa3b3722eac66e4f8baa092d7e6635606ba9b017b04ddc6d781 \
+    --hash=sha256:7eaa1301d8f3b0c996391ebe0d6369d9d8f4d50a526ffe6db7e0d57a9790190d
     # via boto3-stubs-lite
 certifi==2022.9.24 \
     --hash=sha256:0d9c601124e5a6ba9712dbc60d9c53c21e34f5f641fe83002317394311bdce14 \
@@ -572,9 +572,9 @@ mypy-boto3-lambda==1.26.0.post1 \
     --hash=sha256:3e6dedf959aa13fc58e6721d56c93f91068c468659b3d0e22580830f3b39aebc \
     --hash=sha256:c198f5a3749c945cb66eecaf225657d9e4ac23d825ca923827df8f771fab91c4
     # via boto3-stubs-lite
-mypy-boto3-rds==1.26.0.post1 \
-    --hash=sha256:39e65e62668ec33f06b4c15da14977892ea9c5f403b75edc743c8322527ca562 \
-    --hash=sha256:aa81d7cbd92ce0a5da8b0d879f674c31e83a43b43d101fae4990db469af683f5
+mypy-boto3-rds==1.26.9 \
+    --hash=sha256:67749669b18501699f3a5669a21f86e50e5de80d84b2b69c2a7eb7ea604c4968 \
+    --hash=sha256:883101e991df803737d1a56bb2c1b3e9ab9524ac232f95c543e645c9e29fec80
     # via boto3-stubs-lite
 mypy-boto3-s3==1.26.0.post1 \
     --hash=sha256:6d7079f8c739dc993cbedad0736299c413b297814b73795a3855a79169ecc938 \
