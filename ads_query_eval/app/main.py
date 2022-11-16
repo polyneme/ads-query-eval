@@ -289,7 +289,7 @@ def new_evaluation(retrieval_id: str, username: str = Depends(get_current_userna
     )
     items_content = s3.get_json(
         client=s3_client,
-        key=retrieval.s3_key + "__items_top25",
+        key="items_top25__" + retrieval.s3_key,
     )
     id_eval = "/".join(id_eval.split("/")[-2:])
     items_for_evaluation = [
