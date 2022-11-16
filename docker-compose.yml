@@ -14,7 +14,7 @@ services:
       - terminus
 
   terminus:
-    image: terminusdb-server:dev-3a7fef0002e17f64150197eaa6dbe961a34d25e0
+    image: terminusdb/terminusdb-server:dev-3a7fef0002e17f64150197eaa6dbe961a34d25e0
     tty: true
     volumes:
       - terminus_data:/app/terminusdb/storage

@@ -272,7 +272,7 @@ def new_evaluation(retrieval_id: str, username: str = Depends(get_current_userna
     retrieval = Retrieval(
         **find_one(
             terminus_client,
-            {"@type": "Retrieval", "@id": f"Retrieval/{quote(retrieval_id)}"},
+            {"@type": "Retrieval", "s3_key": retrieval_id},
         )
     )
     query = Query(
