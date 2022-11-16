@@ -2,6 +2,6 @@
     status: {{ retrieval.status }}
     <br># retrieved: {{ n_retrieved.get(retrieval.id) }}
     {%  if retrieval.done %}
-        <br> done at {{ retrieval.done_at }}
+        <br> done on {{ retrieval.done_at.date() }}
     {%  endif %}
 </div></a>
