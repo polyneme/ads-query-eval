@@ -32,11 +32,11 @@ class RetrievedItemContent(BaseModel):
     citations: Dict[str, int] = Field(..., alias="[citations]")
     num_citations: Optional[int]
     num_references: Optional[int]
-    abstract: str
+    abstract: Optional[str]
     bibcode: str
     citation_count_norm: float
     doctype: str
-    highlighting: Dict[str, List[str]]
+    highlighting: Optional[Dict[str, List[str]]]
     pubdate: str
     title: str
     author: List[str]

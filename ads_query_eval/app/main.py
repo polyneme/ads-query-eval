@@ -303,10 +303,11 @@ def new_evaluation(retrieval_id: str, username: str = Depends(get_current_userna
     ]
 
     for i in items_for_evaluation:
-        i["highlights"] = sorted(
-            i["retrieved_item_content"].highlighting.items(),
-            key=lambda pair: ("title", "abstract", "body", "ack").index(pair[0]),
-        )
+        if i["retrieved_item_content"].highlighting is not None:
+            i["highlights"] = sorted(
+                i["retrieved_item_content"].highlighting.items(),
+                key=lambda pair: ("title", "abstract", "body", "ack").index(pair[0]),
+            )
     template = jinja_env.get_template("eval_form.jinja2")
     html_content = template.render(
         id_eval=id_eval,
