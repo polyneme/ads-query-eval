@@ -10,6 +10,7 @@ services:
       - ./repl:/home/jovyan/work
       - ./repl/configure_environment.sh:/usr/local/bin/before-notebook.d/configure_environment.sh
       - ./ads_query_eval:/code/ads_query_eval
+      - ~/openalex-snapshot:/data/openalex-snapshot:ro
     env_file:
       - ./config.env
     ports:
