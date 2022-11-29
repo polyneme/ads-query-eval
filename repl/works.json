@@ -1,0 +1,274 @@
+{
+  "template": {
+    "settings": {
+      "index": {
+        "refresh_interval": "1h",
+        "analysis": {
+          "normalizer": {
+            "lower": {
+              "filter": "lowercase"
+            }
+          }
+        },
+        "number_of_shards": "1",
+        "auto_expand_replicas": "0-all"
+      }
+    },
+    "mappings": {
+      "properties": {
+        "abstract_inverted_index": {
+          "type": "flattened",
+          "index": false
+        },
+        "alternate_host_venues": {
+          "properties": {
+            "display_name": {
+              "type": "keyword"
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "is_oa": {
+              "type": "boolean"
+            },
+            "license": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "url": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "alternate_locations": {
+          "properties": {
+            "is_best": {
+              "type": "keyword",
+              "index": false
+            },
+            "is_oa": {
+              "type": "boolean",
+              "index": false
+            },
+            "license": {
+              "type": "keyword"
+            },
+            "url": {
+              "type": "keyword"
+            },
+            "venue_id": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "authorships": {
+          "properties": {
+            "author": {
+              "properties": {
+                "display_name": {
+                  "type": "keyword"
+                },
+                "id": {
+                  "type": "keyword",
+                  "eager_global_ordinals": true
+                },
+                "orcid": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "author_position": {
+              "type": "keyword"
+            },
+            "institutions": {
+              "properties": {
+                "country_code": {
+                  "type": "keyword"
+                },
+                "display_name": {
+                  "type": "keyword"
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "ror": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "biblio": {
+          "type": "flattened",
+          "index": false
+        },
+        "cited_by_api_url": {
+          "type": "keyword",
+          "index": false
+        },
+        "cited_by_count": {
+          "type": "integer"
+        },
+        "concepts": {
+          "properties": {
+            "display_name": {
+              "type": "keyword",
+              "index": false
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "level": {
+              "type": "integer"
+            },
+            "score": {
+              "type": "float",
+              "index": false,
+              "ignore_malformed": false,
+              "coerce": true
+            },
+            "wikidata": {
+              "type": "keyword"
+            }
+          }
+        },
+        "display_name": {
+          "type": "text",
+          "fields": {
+            "complete": {
+              "type": "completion",
+              "analyzer": "simple",
+              "preserve_separators": true,
+              "preserve_position_increments": true,
+              "max_input_length": 50
+            },
+            "keyword": {
+              "type": "keyword"
+            }
+          }
+        },
+        "doi": {
+          "type": "keyword",
+          "index": false
+        },
+        "host_venue": {
+          "dynamic": "true",
+          "properties": {
+            "display_name": {
+              "type": "keyword"
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "is_oa": {
+              "type": "boolean"
+            },
+            "issn": {
+              "type": "keyword",
+              "eager_global_ordinals": true
+            },
+            "issn_l": {
+              "type": "keyword"
+            },
+            "license": {
+              "type": "keyword"
+            },
+            "publisher": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "normalizer": "lower"
+                }
+              }
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "url": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "id": {
+          "type": "keyword",
+          "index": false
+        },
+        "ids": {
+          "type": "object",
+          "dynamic": "true",
+          "enabled": false
+        },
+        "is_paratext": {
+          "type": "boolean"
+        },
+        "is_retracted": {
+          "type": "boolean"
+        },
+        "mesh": {
+          "type": "flattened",
+          "index": false
+        },
+        "open_access": {
+          "properties": {
+            "is_oa": {
+              "type": "boolean"
+            },
+            "oa_status": {
+              "type": "keyword"
+            },
+            "oa_url": {
+              "type": "keyword"
+            }
+          }
+        },
+        "publication_date": {
+          "type": "date"
+        },
+        "publication_year": {
+          "type": "integer"
+        },
+        "referenced_works": {
+          "type": "keyword"
+        },
+        "references_count": {
+          "type": "integer"
+        },
+        "related_works": {
+          "type": "keyword",
+          "index": false
+        },
+        "title": {
+          "type": "keyword",
+          "index": false
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "updated_date": {
+          "type": "date",
+          "index": false
+        },
+        "url": {
+          "type": "keyword",
+          "index": false
+        }
+      }
+    },
+    "aliases": {}
+  }
+}
