@@ -4,6 +4,7 @@ boto3-stubs-lite[essential]
 dagit>=1.0
 dagster>=1.0
 dagster_postgres
+elasticsearch
 fastapi>=0.85.0
 ipywidgets
 jinja2
