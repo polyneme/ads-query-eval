@@ -8,3 +8,4 @@ config.env
 *.egg-info
 query-eval.properties
 ADS_DOI.tsv.gz
+ca.crt
