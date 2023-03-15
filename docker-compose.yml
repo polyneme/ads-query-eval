@@ -67,6 +67,18 @@ services:
     depends_on:
       - dagster-postgresql
 
+  ibis:
+      image: polyneme/p5-app-ibis-web
+      command: carton exec starman -I/carton/lib/perl5 -Ilib -e 'enable ForceEnv => REMOTE_USER => $$ENV{EMAIL}' app_ibis.psgi
+      volumes:
+        - .:/home/catalyst
+      ports:
+        - "5000:5000"
+      environment:
+        PERL_CARTON_PATH: /carton
+        PERL5LIB: /code/lib:/carton/lib/perl5
+        EMAIL: donny@polyneme.xyz
+
   snappass:
       image: polyneme/snappass
       stop_signal: SIGINT

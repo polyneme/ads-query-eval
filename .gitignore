@@ -9,3 +9,4 @@ config.env
 query-eval.properties
 ADS_DOI.tsv.gz
 ca.crt
+trine.db
